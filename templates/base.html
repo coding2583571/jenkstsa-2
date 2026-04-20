@@ -1,0 +1,123 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}{{ page_title|default:"Jenks TSA" }}{% endblock %} — Jenks TSA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600;9..144,700;9..144,900&family=Figtree:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/main.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<nav class="site-nav" id="site-nav">
+  <div class="nav-inner">
+    <a href="{% url 'core:home' %}" class="nav-brand">
+      <img src="{% static 'img/jenkstsa_logo.png' %}" alt="Jenks TSA" class="nav-logo">
+      <span class="nav-name">Jenks <strong>TSA</strong></span>
+    </a>
+
+    <div class="nav-links">
+      <a href="{% url 'events:index' %}" class="nav-link {% if request.resolver_match.app_name == 'events' %}active{% endif %}">Events</a>
+      <a href="{% url 'events:rubrics' %}" class="nav-link {% if request.resolver_match.url_name == 'rubrics' %}active{% endif %}">Rubrics</a>
+      <a href="{% url 'newsroom:index' %}" class="nav-link {% if request.resolver_match.app_name == 'newsroom' %}active{% endif %}">Newsroom</a>
+      <a href="{% url 'core:calendar' %}" class="nav-link {% if request.resolver_match.url_name == 'calendar' %}active{% endif %}">Calendar</a>
+      <a href="{% url 'packet:packet' %}" class="nav-link {% if request.resolver_match.app_name == 'packet' %}active{% endif %}">Sponsors</a>
+      <a href="{% url 'core:contact' %}" class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}">Contact</a>
+    </div>
+
+    <div class="nav-actions">
+      {% if user.is_authenticated %}
+        {% if user.is_admin %}
+          <a href="{% url 'admin_dashboard' %}" class="nav-admin-btn">
+            Admin
+            {% with counts=unread_counts %}
+            {% if counts.sponsor_msgs or counts.student_msgs or counts.general_msgs %}
+            <span class="nav-badge">{{ counts.sponsor_msgs|add:counts.student_msgs|add:counts.general_msgs }}</span>
+            {% endif %}
+            {% endwith %}
+          </a>
+        {% endif %}
+        <a href="{% url 'accounts:dashboard' %}" class="nav-user-btn">
+          <span class="nav-user-name">{{ user.first_name|default:user.email }}</span>
+        </a>
+        <a href="{% url 'accounts:logout' %}" class="nav-btn-outline">Sign Out</a>
+      {% else %}
+        <a href="{% url 'accounts:login' %}" class="nav-btn-outline">Sign In</a>
+        <a href="{% url 'accounts:signup' %}" class="nav-btn-primary">Join</a>
+      {% endif %}
+    </div>
+
+    <button class="nav-mobile-toggle" id="nav-toggle" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+
+  <div class="nav-mobile-menu" id="nav-mobile-menu">
+    <a href="{% url 'events:index' %}" class="mob-link">Events</a>
+    <a href="{% url 'events:rubrics' %}" class="mob-link">Rubrics</a>
+    <a href="{% url 'newsroom:index' %}" class="mob-link">Newsroom</a>
+    <a href="{% url 'core:calendar' %}" class="mob-link">Calendar</a>
+    <a href="{% url 'packet:packet' %}" class="mob-link">Sponsors</a>
+    <a href="{% url 'core:contact' %}" class="mob-link">Contact</a>
+    <div class="mob-divider"></div>
+    {% if user.is_authenticated %}
+      <a href="{% url 'accounts:dashboard' %}" class="mob-link">Dashboard</a>
+      <a href="{% url 'accounts:logout' %}" class="mob-link">Sign Out</a>
+    {% else %}
+      <a href="{% url 'accounts:login' %}" class="mob-link">Sign In</a>
+      <a href="{% url 'accounts:signup' %}" class="mob-link mob-cta">Create Account</a>
+    {% endif %}
+  </div>
+</nav>
+
+<main class="site-main">
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <img src="{% static 'img/jenkstsa_logo.png' %}" alt="Jenks TSA" class="footer-logo">
+      <div>
+        <div class="footer-name">Jenks TSA</div>
+        <div class="footer-sub">Technology Student Association<br>Jenks High School · Oklahoma</div>
+      </div>
+    </div>
+    <div class="footer-links">
+      <div class="footer-col">
+        <div class="footer-col-head">Program</div>
+        <a href="{% url 'events:index' %}">Events</a>
+        <a href="{% url 'events:rubrics' %}">Rubrics</a>
+        <a href="{% url 'events:forms' %}">Forms</a>
+        <a href="{% url 'events:resources' %}">Resources</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-head">Connect</div>
+        <a href="{% url 'newsroom:index' %}">Newsroom</a>
+        <a href="{% url 'core:calendar' %}">Calendar</a>
+        <a href="{% url 'core:contact' %}">Contact</a>
+        <a href="https://instagram.com/jenkstsa" target="_blank" rel="noopener">Instagram</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-head">Sponsors</div>
+        <a href="{% url 'packet:packet' %}">Prospectus</a>
+        <a href="{% url 'packet:commit' %}">Partner With Us</a>
+        <a href="{% url 'packet:status' %}">Check Status</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">© {% now "Y" %} Jenks TSA. All rights reserved.</span>
+    <span class="footer-mono">JENKSTSA.ORG</span>
+  </div>
+</footer>
+
+<script src="{% static 'js/main.js' %}"></script>
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

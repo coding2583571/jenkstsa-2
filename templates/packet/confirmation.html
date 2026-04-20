@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/packet.css' %}">{% endblock %}
+
+{% block content %}
+<div class="conf-page">
+  <div class="conf-card">
+    <div class="conf-check">✓</div>
+    <div class="conf-eyebrow">SUBMISSION CONFIRMED</div>
+    <h1 class="conf-title">Thank you, {{ commitment.company }}.</h1>
+    <p class="conf-body">Your sponsorship interest has been received. We'll be in touch within 2–3 business days.</p>
+
+    <div class="conf-number-block">
+      <div class="conf-number-label">YOUR CONFIRMATION NUMBER</div>
+      <div class="conf-number" id="conf-num">{{ commitment.confirmation_number }}</div>
+      <button class="conf-copy-btn" onclick="copyConfirmation()">Copy</button>
+    </div>
+
+    <div class="conf-info-grid">
+      <div class="conf-info-row">
+        <span class="cir-label">Company</span>
+        <span class="cir-value">{{ commitment.company }}</span>
+      </div>
+      <div class="conf-info-row">
+        <span class="cir-label">Contact</span>
+        <span class="cir-value">{{ commitment.contact_name }}</span>
+      </div>
+      <div class="conf-info-row">
+        <span class="cir-label">Email</span>
+        <span class="cir-value">{{ commitment.email }}</span>
+      </div>
+      {% if commitment.tier %}
+      <div class="conf-info-row">
+        <span class="cir-label">Tier Selected</span>
+        <span class="cir-value">{{ commitment.tier.name }}</span>
+      </div>
+      {% endif %}
+      <div class="conf-info-row">
+        <span class="cir-label">Status</span>
+        <span class="cir-value status-badge-{{ commitment.status }}">{{ commitment.get_status_display }}</span>
+      </div>
+    </div>
+
+    <div class="conf-actions">
+      <a href="{% url 'packet:progress' commitment.confirmation_number %}" class="btn-primary">View Progress Page</a>
+      <button class="btn-outline" onclick="copyPageLink()">Copy Page Link</button>
+      {% if not user.is_authenticated %}
+      <a href="{% url 'accounts:signup' %}?role=sponsor" class="btn-text-link">Create an account to track this →</a>
+      {% endif %}
+    </div>
+
+    {% if not user.is_authenticated %}
+    <!-- Contact us without account -->
+    <div class="conf-message-section">
+      <h4>Have a question?</h4>
+      <p>Send us a message below — no account needed.</p>
+      <div id="msg-form-wrap">
+        <div class="pkt-form-row">
+          <div class="pkt-form-field">
+            <label>Your Name</label>
+            <input type="text" id="msg-name" value="{{ commitment.contact_name }}">
+          </div>
+          <div class="pkt-form-field">
+            <label>Email</label>
+            <input type="email" id="msg-email" value="{{ commitment.email }}">
+          </div>
+        </div>
+        <div class="pkt-form-field" style="margin-top:12px;">
+          <label>Message</label>
+          <textarea id="msg-content" rows="4" placeholder="Type your message..."></textarea>
+        </div>
+        <div id="msg-error" class="pkt-form-error" hidden></div>
+        <button class="pkt-submit-btn" style="margin-top:12px;" onclick="sendMessage()">Send Message</button>
+      </div>
+      <div id="msg-success" hidden style="color:var(--blue);margin-top:12px;font-weight:600;">Message sent! We'll be in touch.</div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function copyConfirmation() {
+  navigator.clipboard.writeText('{{ commitment.confirmation_number }}').then(() => {
+    const btn = document.querySelector('.conf-copy-btn');
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+function copyPageLink() {
+  navigator.clipboard.writeText(window.location.href).then(() => alert('Link copied!'));
+}
+async function sendMessage() {
+  const name = document.getElementById('msg-name').value.trim();
+  const email = document.getElementById('msg-email').value.trim();
+  const content = document.getElementById('msg-content').value.trim();
+  const err = document.getElementById('msg-error');
+  if (!content) { err.textContent = 'Please enter a message.'; err.hidden = false; return; }
+  const fd = new FormData();
+  fd.append('name', name); fd.append('email', email);
+  fd.append('content', content); fd.append('commitment_id', '{{ commitment.id }}');
+  fd.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+  const res = await fetch('/messages/send/', { method: 'POST', body: fd });
+  const j = await res.json();
+  if (j.success) {
+    document.getElementById('msg-form-wrap').hidden = true;
+    document.getElementById('msg-success').hidden = false;
+  } else { err.textContent = j.error; err.hidden = false; }
+}
+</script>
+{% endblock %}

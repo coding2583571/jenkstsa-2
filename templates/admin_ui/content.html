@@ -1,0 +1,178 @@
+{% extends "admin_ui/base.html" %}
+{% block content %}
+{% csrf_token %}
+
+<p style="font-size:14px;color:var(--muted);margin-bottom:28px;max-width:620px;">
+  All content on the sponsorship packet and site is editable here. Changes go live immediately. Each field auto-saves when you click Save.
+</p>
+
+<!-- ── SITE CONTENT KEY-VALUE ────────────────────── -->
+<div class="adm-section-card" style="margin-bottom:24px;">
+  <div class="adm-section-card-head">
+    <span class="adm-section-card-title">Packet Text Content</span>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--muted);">{{ content_items|length }} keys</span>
+  </div>
+  <div style="padding:8px 0;">
+    {% for item in content_items %}
+    <div class="content-key-item" id="item-{{ item.key }}">
+      <div>
+        <div class="content-key">{{ item.key }}</div>
+        {% if item.description %}<div style="font-size:11px;color:var(--muted);margin-top:2px;">{{ item.description }}</div>{% endif %}
+      </div>
+      <input class="content-val-input" value="{{ item.value }}" data-key="{{ item.key }}" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();saveKey(this);}">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button class="save-content-btn" onclick="saveKey(this.closest('.content-key-item').querySelector('input'))">Save</button>
+        <span class="save-ok" id="ok-{{ item.key }}">Saved</span>
+      </div>
+    </div>
+    {% empty %}
+    <div style="padding:24px;text-align:center;color:var(--muted);font-size:14px;">
+      No content keys yet. Run <code style="font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--line);padding:2px 6px;">python manage.py seed_data</code> to populate defaults.
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- ── COVER STATS ────────────────────────────────── -->
+<div class="adm-section-card" style="margin-bottom:24px;">
+  <div class="adm-section-card-head">
+    <span class="adm-section-card-title">Cover Statistics</span>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--muted);">Edit via Django Admin</span>
+  </div>
+  <table class="adm-table">
+    <thead><tr><th>Number</th><th>Unit</th><th>Label</th><th>Order</th></tr></thead>
+    <tbody>
+    {% for stat in cover_stats %}
+    <tr>
+      <td style="font-family:'Fraunces',serif;font-weight:900;font-size:20px;">{{ stat.number }}</td>
+      <td style="color:var(--blue);">{{ stat.unit }}</td>
+      <td>{{ stat.label }}</td>
+      <td style="color:var(--muted);">{{ stat.order }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px;">No stats. Add via <a href="/django-admin/packet/coverstat/add/" style="color:var(--blue);">Django Admin</a></td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <div style="padding:12px 16px;border-top:1px solid var(--line);">
+    <a href="/django-admin/packet/coverstat/" class="btn-outline" style="font-size:12px;padding:7px 14px;">Manage Stats</a>
+  </div>
+</div>
+
+<!-- ── PODIUM FINISHES ────────────────────────────── -->
+<div class="adm-section-card" style="margin-bottom:24px;">
+  <div class="adm-section-card-head">
+    <span class="adm-section-card-title">Podium Finishes</span>
+  </div>
+  <table class="adm-table">
+    <thead><tr><th>Place</th><th>Event</th><th>Conference</th><th>Year</th></tr></thead>
+    <tbody>
+    {% for finish in podium_finishes %}
+    <tr>
+      <td style="font-family:'Fraunces',serif;font-weight:900;font-size:18px;color:{% if finish.place == '1st' %}#F5C842{% else %}var(--red){% endif %};">{{ finish.place }}</td>
+      <td style="font-weight:600;">{{ finish.event_name }}</td>
+      <td style="color:var(--muted);">{{ finish.conference }}</td>
+      <td style="color:var(--muted);">{{ finish.year }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px;">No finishes yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <div style="padding:12px 16px;border-top:1px solid var(--line);">
+    <a href="/django-admin/packet/podiumfinish/" class="btn-outline" style="font-size:12px;padding:7px 14px;">Manage Finishes</a>
+  </div>
+</div>
+
+<!-- ── SPONSORSHIP TIERS ───────────────────────────── -->
+<div class="adm-section-card" style="margin-bottom:24px;">
+  <div class="adm-section-card-head">
+    <span class="adm-section-card-title">Sponsorship Tiers</span>
+  </div>
+  <table class="adm-table">
+    <thead><tr><th>Name</th><th>Amount</th><th>Badge</th><th>Benefits</th></tr></thead>
+    <tbody>
+    {% for tier in tiers %}
+    <tr>
+      <td style="font-family:'Fraunces',serif;font-weight:700;font-size:16px;">{{ tier.name }}</td>
+      <td style="font-weight:700;">{{ tier.amount }}</td>
+      <td>{% if tier.badge_text %}<span class="status-badge status-contacted">{{ tier.badge_text }}</span>{% else %}&mdash;{% endif %}</td>
+      <td style="color:var(--muted);">{{ tier.benefits.count }} benefit(s)</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px;">No tiers. Run seed_data.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <div style="padding:12px 16px;border-top:1px solid var(--line);display:flex;gap:10px;">
+    <a href="/django-admin/packet/sponsorshiptier/" class="btn-outline" style="font-size:12px;padding:7px 14px;">Manage Tiers</a>
+    <a href="/django-admin/packet/tierbenefit/" class="btn-outline" style="font-size:12px;padding:7px 14px;">Manage Benefits</a>
+  </div>
+</div>
+
+<!-- ── BUDGET ITEMS ───────────────────────────────── -->
+<div class="adm-section-card" style="margin-bottom:24px;">
+  <div class="adm-section-card-head"><span class="adm-section-card-title">What Your Dollars Do</span></div>
+  <table class="adm-table">
+    <thead><tr><th>Amount</th><th>Title</th><th>Description</th></tr></thead>
+    <tbody>
+    {% for item in budget_items %}
+    <tr>
+      <td style="font-family:'Fraunces',serif;font-weight:900;font-size:18px;">{{ item.amount }}</td>
+      <td style="font-weight:600;">{{ item.title }}</td>
+      <td style="color:var(--muted);">{{ item.description|truncatechars:60 }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="3" style="text-align:center;color:var(--muted);padding:16px;">No items. Run seed_data.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <div style="padding:12px 16px;border-top:1px solid var(--line);">
+    <a href="/django-admin/packet/budgetitem/" class="btn-outline" style="font-size:12px;padding:7px 14px;">Manage Items</a>
+  </div>
+</div>
+
+<!-- ── PARTNER OPTIONS ────────────────────────────── -->
+<div class="adm-section-card" style="margin-bottom:24px;">
+  <div class="adm-section-card-head"><span class="adm-section-card-title">Other Ways to Partner</span></div>
+  <table class="adm-table">
+    <thead><tr><th>Title</th><th>Description</th><th>Example</th></tr></thead>
+    <tbody>
+    {% for opt in partner_options %}
+    <tr>
+      <td style="font-weight:700;">{{ opt.title }}</td>
+      <td style="color:var(--muted);">{{ opt.description|truncatechars:60 }}</td>
+      <td style="font-style:italic;color:var(--muted);">{{ opt.example|truncatechars:40 }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="3" style="text-align:center;color:var(--muted);padding:16px;">No options. Run seed_data.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <div style="padding:12px 16px;border-top:1px solid var(--line);">
+    <a href="/django-admin/packet/partneroption/" class="btn-outline" style="font-size:12px;padding:7px 14px;">Manage Options</a>
+  </div>
+</div>
+
+{% endblock %}
+{% block extra_scripts %}
+<script>
+async function saveKey(input) {
+  const key = input.dataset.key;
+  const value = input.value;
+  const fd = new FormData();
+  fd.append('key', key);
+  fd.append('value', value);
+  fd.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+  const r = await fetch("{% url 'admin_save_content' %}", { method:'POST', body:fd });
+  const j = await r.json();
+  if (j.success) {
+    const ok = document.getElementById('ok-'+key);
+    if (ok) { ok.style.display='inline'; setTimeout(()=>ok.style.display='none', 2000); }
+    showToast('Saved: '+key, '#16a34a');
+  } else {
+    showToast('Error saving', 'var(--red)');
+  }
+}
+</script>
+{% endblock %}

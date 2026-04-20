@@ -1,0 +1,97 @@
+{% extends "admin_ui/base.html" %}
+{% block content %}
+{% load static %}
+{% csrf_token %}
+
+<!-- Stats row -->
+<div class="adm-stats-row">
+  <div class="adm-stat-card">
+    <div class="adm-stat-num">{{ total_commitments }}</div>
+    <div class="adm-stat-label">Total Inquiries</div>
+  </div>
+  <div class="adm-stat-card red">
+    <div class="adm-stat-num">{{ pending }}</div>
+    <div class="adm-stat-label">Pending Review</div>
+  </div>
+  <div class="adm-stat-card green">
+    <div class="adm-stat-num">{{ completed }}</div>
+    <div class="adm-stat-label">Completed</div>
+  </div>
+  <div class="adm-stat-card gold">
+    <div class="adm-stat-num">{{ published_posts }}</div>
+    <div class="adm-stat-label">Blog Posts</div>
+  </div>
+</div>
+
+<!-- Message badges row -->
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:32px;">
+  <a href="{% url 'admin_messages' %}?type=sponsor" style="background:#fff;border:1px solid var(--line);border-left:4px solid var(--blue);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;text-decoration:none;">
+    <div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Sponsor Messages</div>
+      <div style="font-family:'Fraunces',serif;font-weight:900;font-size:28px;color:var(--ink);">{{ unread_sponsor }}</div>
+    </div>
+    <div class="adm-msg-icon" style="background:var(--blue);">SP</div>
+  </a>
+  <a href="{% url 'admin_messages' %}?type=student" style="background:#fff;border:1px solid var(--line);border-left:4px solid var(--gold);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;text-decoration:none;">
+    <div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Student Messages</div>
+      <div style="font-family:'Fraunces',serif;font-weight:900;font-size:28px;color:var(--ink);">{{ unread_student }}</div>
+    </div>
+    <div class="adm-msg-icon" style="background:var(--gold);">ST</div>
+  </a>
+  <a href="{% url 'admin_messages' %}?type=general" style="background:#fff;border:1px solid var(--line);border-left:4px solid var(--muted);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;text-decoration:none;">
+    <div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">General Messages</div>
+      <div style="font-family:'Fraunces',serif;font-weight:900;font-size:28px;color:var(--ink);">{{ unread_general }}</div>
+    </div>
+    <div class="adm-msg-icon" style="background:var(--muted);">GN</div>
+  </a>
+</div>
+
+<!-- Recent commitments -->
+<div class="adm-table-wrap" style="margin-bottom:28px;">
+  <div class="adm-table-head">
+    <span class="adm-table-title">Recent Commitments</span>
+    <a href="{% url 'admin_sponsorships' %}" style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--blue);">View All →</a>
+  </div>
+  <table class="adm-table">
+    <thead><tr>
+      <th>Confirmation</th><th>Company</th><th>Tier</th><th>Status</th><th>Submitted</th>
+    </tr></thead>
+    <tbody>
+    {% for c in recent_commitments %}
+    <tr>
+      <td><a href="{% url 'admin_sponsorship_detail' c.id %}">{{ c.confirmation_number }}</a></td>
+      <td style="font-weight:600;">{{ c.company }}</td>
+      <td>{{ c.tier.name|default:"—" }}</td>
+      <td><span class="status-badge status-{{ c.status }}">{{ c.get_status_display }}</span></td>
+      <td style="color:var(--muted);">{{ c.created_at|date:"M j, Y" }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:28px;">No submissions yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Recent messages -->
+<div class="adm-table-wrap">
+  <div class="adm-table-head">
+    <span class="adm-table-title">Recent Messages</span>
+    <a href="{% url 'admin_messages' %}" style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--blue);">View All →</a>
+  </div>
+  {% for msg in recent_messages %}
+  <a href="{% url 'admin_message_detail' msg.id %}" class="inbox-item {% if not msg.is_read %}unread{% endif %}" style="text-decoration:none;">
+    <div class="inbox-dot {% if msg.is_read %}read{% endif %}"></div>
+    <div>
+      <div class="inbox-sender">{{ msg.sender_name }} <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-weight:400;margin-left:8px;">{{ msg.message_type }}</span></div>
+      <div class="inbox-preview">{{ msg.content|truncatechars:80 }}</div>
+    </div>
+    <div class="inbox-time">{{ msg.created_at|timesince }} ago</div>
+  </a>
+  {% empty %}
+  <div style="padding:28px;text-align:center;color:var(--muted);font-size:14px;">No messages yet.</div>
+  {% endfor %}
+</div>
+
+{% endblock %}

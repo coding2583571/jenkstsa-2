@@ -1,0 +1,129 @@
+{% extends "admin_ui/base.html" %}
+{% block content %}
+{% csrf_token %}
+
+<div style="margin-bottom:20px;">
+  <a href="{% url 'admin_messages' %}" style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);">← All Messages</a>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start;">
+
+  <!-- Thread -->
+  <div>
+    <div class="adm-section-card">
+      <div class="adm-section-card-head">
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">
+            {{ msg.message_type|upper }} MESSAGE &mdash; {{ msg.created_at|date:"F j, Y g:i A" }}
+          </div>
+          <div style="font-family:'Fraunces',serif;font-weight:700;font-size:22px;color:var(--ink);">
+            {{ msg.sender_name }}
+          </div>
+          <div style="font-size:13px;color:var(--muted);margin-top:2px;">{{ msg.sender_email }}{% if msg.sender_phone %} &middot; {{ msg.sender_phone }}{% endif %}</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          {% if msg.related_commitment %}
+          <a href="{% url 'admin_sponsorship_detail' msg.related_commitment.id %}" style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--blue);border:1px solid var(--blue);padding:5px 12px;">
+            {{ msg.related_commitment.confirmation_number }}
+          </a>
+          {% endif %}
+          {% if not msg.is_read %}
+          <button onclick="markRead()" style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;background:var(--line);color:var(--muted);border:none;padding:5px 12px;cursor:pointer;">Mark Read</button>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Original message -->
+      <div style="padding:24px;border-bottom:1px solid var(--line);">
+        <div style="font-size:15px;line-height:1.75;color:var(--ink-soft);">{{ msg.content }}</div>
+      </div>
+
+      <!-- Replies thread -->
+      {% for reply in replies %}
+      <div style="padding:20px 24px;border-bottom:1px solid var(--line);background:var(--blue-soft);">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--blue);">
+            Admin Reply &mdash; {{ reply.admin_user.full_name|default:"Admin" }}
+          </span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);">{{ reply.created_at|date:"M j, Y g:i A" }}</span>
+        </div>
+        <div style="font-size:14.5px;line-height:1.7;color:var(--ink-soft);">{{ reply.content }}</div>
+      </div>
+      {% endfor %}
+
+      <!-- Reply box -->
+      <div style="padding:24px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">
+          REPLY (sends email to {{ msg.sender_email }})
+        </div>
+        <textarea id="reply-content" rows="5" class="content-val-input" style="width:100%;margin-bottom:12px;border:1.5px solid var(--line);padding:10px 14px;font-size:14px;font-family:'Figtree',sans-serif;resize:vertical;" placeholder="Write your reply…"></textarea>
+        <button onclick="sendReply()" class="btn-primary">Send Reply</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sender info sidebar -->
+  <div>
+    <div class="adm-section-card">
+      <div class="adm-section-card-head"><span class="adm-section-card-title">Sender Info</span></div>
+      <div class="adm-section-card-body" style="font-size:13.5px;">
+        <div style="margin-bottom:14px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Name</div>
+          <div style="font-weight:600;color:var(--ink);">{{ msg.sender_name }}</div>
+        </div>
+        <div style="margin-bottom:14px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Email</div>
+          <a href="mailto:{{ msg.sender_email }}" style="color:var(--blue);">{{ msg.sender_email }}</a>
+        </div>
+        {% if msg.sender_phone %}
+        <div style="margin-bottom:14px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Phone</div>
+          <div style="color:var(--ink);">{{ msg.sender_phone }}</div>
+        </div>
+        {% endif %}
+        <div style="margin-bottom:14px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Type</div>
+          <span class="status-badge status-contacted" style="text-transform:uppercase;">{{ msg.message_type }}</span>
+        </div>
+        {% if msg.sender_user %}
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Account</div>
+          <div style="color:var(--ink);">{{ msg.sender_user.email }}</div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if msg.related_commitment %}
+    <div class="adm-section-card" style="margin-top:16px;">
+      <div class="adm-section-card-head"><span class="adm-section-card-title">Related Commitment</span></div>
+      <div class="adm-section-card-body">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:var(--muted);margin-bottom:4px;">{{ msg.related_commitment.confirmation_number }}</div>
+        <div style="font-weight:700;font-size:15px;margin-bottom:8px;">{{ msg.related_commitment.company }}</div>
+        <span class="status-badge status-{{ msg.related_commitment.status }}">{{ msg.related_commitment.get_status_display }}</span>
+        <br><br>
+        <a href="{% url 'admin_sponsorship_detail' msg.related_commitment.id %}" class="btn-outline" style="font-size:12px;padding:7px 14px;">View Commitment</a>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+
+{% endblock %}
+{% block extra_scripts %}
+<script>
+async function sendReply() {
+  const content = document.getElementById('reply-content').value.trim();
+  if (!content) { showToast('Reply cannot be empty', 'var(--red)'); return; }
+  const j = await postJSON("{% url 'admin_reply_message' msg.id %}", { content });
+  if (j.success) { showToast('Reply sent', '#16a34a'); document.getElementById('reply-content').value=''; setTimeout(()=>location.reload(),1200); }
+  else showToast(j.error||'Error', 'var(--red)');
+}
+async function markRead() {
+  await postJSON("{% url 'admin_mark_read' msg.id %}", {});
+  showToast('Marked as read', 'var(--blue)');
+  document.querySelector('[onclick="markRead()"]').remove();
+}
+</script>
+{% endblock %}

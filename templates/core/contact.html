@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="section-eyebrow">GET IN TOUCH</div>
+    <h1>Contact <em>Us.</em></h1>
+    <p>Questions about our program, sponsorships, or events? We'd love to hear from you.</p>
+  </div>
+</div>
+
+<div class="contact-page">
+  <div class="contact-grid">
+
+    <!-- LEFT: Info -->
+    <div>
+      <div class="contact-info-block">
+        <div class="contact-info-label">Faculty Sponsor</div>
+        <div class="contact-info-value">
+          <strong>Dr. David Lawrence</strong><br>
+          <a href="mailto:david.lawrence@jenksps.org">david.lawrence@jenksps.org</a><br>
+          918-299-4415 x2312
+        </div>
+      </div>
+      <div class="contact-info-block">
+        <div class="contact-info-label">Chapter</div>
+        <div class="contact-info-value">
+          <a href="mailto:info@jenkstsa.org">info@jenkstsa.org</a><br>
+          <a href="https://www.jenkstsa.org">www.jenkstsa.org</a>
+        </div>
+      </div>
+      <div class="contact-info-block">
+        <div class="contact-info-label">Social</div>
+        <div class="contact-social-row">
+          <a href="https://instagram.com/jenkstsa" target="_blank" rel="noopener" class="social-link">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+            @jenkstsa
+          </a>
+          <a href="https://linkedin.com/company/jenkstsa" target="_blank" rel="noopener" class="social-link">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+            LinkedIn
+          </a>
+        </div>
+      </div>
+      <div class="contact-info-block">
+        <div class="contact-info-label">Payment / 501(c)(3)</div>
+        <div class="contact-info-value">
+          Jenks Public Schools Foundation<br>
+          <a href="mailto:jenksfoundation@jenksps.org">jenksfoundation@jenksps.org</a><br>
+          918-299-4463<br>
+          P.O. Box 595, Jenks, OK 74037
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Form -->
+    <div class="contact-form-card">
+      <h3 class="cf-title">Send a Message</h3>
+      <div id="cf-error" class="cf-error" style="display:none;"></div>
+      <div id="cf-success" class="cf-success" style="display:none;">✓ Message sent! We'll be in touch soon.</div>
+
+      <form id="contact-form">
+        {% csrf_token %}
+        <div class="cf-field">
+          <label>Your Name</label>
+          <input type="text" name="name" required autocomplete="name"
+            {% if user.is_authenticated %}value="{{ user.full_name }}"{% endif %}>
+        </div>
+        <div class="cf-field">
+          <label>Email Address</label>
+          <input type="email" name="email" required autocomplete="email"
+            {% if user.is_authenticated %}value="{{ user.email }}"{% endif %}>
+        </div>
+        <div class="cf-field">
+          <label>Phone <span style="font-size:10px;font-family:'JetBrains Mono',monospace;letter-spacing:0.1em;">(OPTIONAL)</span></label>
+          <input type="tel" name="phone" autocomplete="tel">
+        </div>
+        <div class="cf-field">
+          <label>Message</label>
+          <textarea name="message" rows="5" required placeholder="What's on your mind?"></textarea>
+        </div>
+        <button type="submit" class="btn-primary" style="width:100%;justify-content:center;margin-top:4px;">Send Message</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

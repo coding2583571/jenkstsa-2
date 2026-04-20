@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<section class="hero">
+  <div class="hero-bg-grid"></div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow">
+      <span class="eyebrow-dot"></span>
+      JENKS HIGH SCHOOL &middot; OKLAHOMA
+    </div>
+    <h1 class="hero-title">{{ hero_title|safe }}</h1>
+    <p class="hero-body">{{ hero_body }}</p>
+    <div class="hero-actions">
+      <a href="{% url 'events:index' %}" class="btn-primary">Explore Events</a>
+      <a href="{% url 'packet:packet' %}" class="btn-outline">Sponsor Us</a>
+    </div>
+  </div>
+  <div class="hero-stats-bar">
+    <div class="hero-stat"><span class="hs-num">1</span><span class="hs-label">Year Old</span></div>
+    <div class="hero-stat"><span class="hs-num">9</span><span class="hs-label">State Podiums</span></div>
+    <div class="hero-stat"><span class="hs-num">3</span><span class="hs-label">1st Place Wins</span></div>
+    <div class="hero-stat"><span class="hs-num">25+</span><span class="hs-label">Active Members</span></div>
+  </div>
+</section>
+
+<section class="about-strip">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-text">
+        <div class="section-eyebrow">WHO WE ARE</div>
+        <h2 class="section-h2">Oklahoma's fastest-rising <em>tech student org.</em></h2>
+        <p>Founded in 2024, Jenks TSA competes in events spanning engineering design, software development, video game design, coding, and leadership. We ship real projects, pitch to judges, and defend our work under pressure.</p>
+        <a href="{% url 'events:index' %}" class="btn-text-link">See our events</a>
+      </div>
+      <div class="about-highlights">
+        <div class="highlight-card">
+          <div class="hc-num">01</div>
+          <div class="hc-body">
+            <div class="hc-title">State Champions</div>
+            <div class="hc-sub">Future Technology Teacher, Debating Technological Issues, Coding &mdash; 2026 Oklahoma State Conference</div>
+          </div>
+        </div>
+        <div class="highlight-card">
+          <div class="hc-num">02</div>
+          <div class="hc-body">
+            <div class="hc-title">National Competitors</div>
+            <div class="hc-sub">Qualified members attending TSA National Conference, competing against chapters from all 50 states</div>
+          </div>
+        </div>
+        <div class="highlight-card">
+          <div class="hc-num">03</div>
+          <div class="hc-body">
+            <div class="hc-title">Real-World Impact</div>
+            <div class="hc-sub">Students go on to top-tier STEM universities and careers in engineering, software, and design</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="results-strip">
+  <div class="container">
+    <div class="results-strip-inner">
+      <div class="results-strip-label">2026 OKLAHOMA STATE CONFERENCE</div>
+      <div class="results-strip-row">
+        <div class="rs-item"><span class="rs-place gold">1st</span><span class="rs-event">Future Technology Teacher</span></div>
+        <div class="rs-item"><span class="rs-place">2nd</span><span class="rs-event">Future Technology Teacher</span></div>
+        <div class="rs-item"><span class="rs-place gold">1st</span><span class="rs-event">Debating Technological Issues</span></div>
+        <div class="rs-item"><span class="rs-place gold">1st</span><span class="rs-event">Coding</span></div>
+        <div class="rs-item"><span class="rs-place">3rd</span><span class="rs-event">Technology Bowl</span></div>
+        <div class="rs-item"><span class="rs-place">2nd</span><span class="rs-event">Video Game Design</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if recent_posts %}
+<section class="news-preview">
+  <div class="container">
+    <div class="section-head-row">
+      <div>
+        <div class="section-eyebrow">NEWSROOM</div>
+        <h2 class="section-h2">Latest <em>updates.</em></h2>
+      </div>
+      <a href="{% url 'newsroom:index' %}" class="btn-outline-sm">All Posts</a>
+    </div>
+    <div class="news-grid">
+      {% for post in recent_posts %}
+      <article class="news-card">
+        {% if post.cover_image %}<img src="{{ post.cover_image.url }}" alt="{{ post.title }}" class="news-card-img">
+        {% else %}<div class="news-card-img-placeholder"></div>{% endif %}
+        <div class="news-card-body">
+          <div class="news-meta">
+            <span class="news-author">{{ post.author.full_name|default:"Jenks TSA" }}</span>
+            <span class="news-date">{{ post.published_at|date:"M j, Y" }}</span>
+          </div>
+          <h3 class="news-title"><a href="{% url 'newsroom:detail' post.slug %}">{{ post.title }}</a></h3>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="sponsor-cta">
+  <div class="container">
+    <div class="cta-inner">
+      <div class="cta-text">
+        <div class="section-eyebrow" style="color:rgba(255,255,255,0.45);">PARTNER WITH US</div>
+        <h2 class="cta-title">Invest in the next generation<br>of <em>tech leaders.</em></h2>
+        <p class="cta-body">Your sponsorship funds national travel, equipment, and student development. Every dollar directly impacts a student's future in STEM.</p>
+      </div>
+      <div class="cta-actions">
+        <a href="{% url 'packet:packet' %}" class="btn-white">View Sponsorship Packet</a>
+        <a href="{% url 'packet:commit' %}" class="btn-white-outline">Become a Sponsor</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

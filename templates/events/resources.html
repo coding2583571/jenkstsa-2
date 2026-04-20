@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="section-eyebrow">MEMBER RESOURCES</div>
+    <h1>Templates &amp; <em>Guides.</em></h1>
+    <p>Everything you need to prepare competitive submissions — documentation, work logs, and how-to guides.</p>
+  </div>
+</div>
+<div class="content-page container">
+
+  {% if portfolio_resources %}
+  <div style="margin-bottom:48px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);border-bottom:2px solid var(--line);padding-bottom:10px;margin-bottom:20px;">DOCUMENTATION PORTFOLIO</div>
+    {% for r in portfolio_resources %}
+    <div class="resource-card">
+      <div class="resource-type-tag">Portfolio Template</div>
+      <div class="resource-name">{{ r.name }}</div>
+      <p style="font-size:14px;color:var(--ink-soft);line-height:1.6;">{{ r.description }}</p>
+      {% if r.how_to %}
+      <div class="resource-how-to">
+        <strong style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:6px;">HOW TO USE</strong>
+        {{ r.how_to|linebreaks }}
+      </div>
+      {% endif %}
+      {% if r.url %}
+      <a href="{{ r.url }}" target="_blank" class="rubric-download" style="margin-top:14px;display:inline-block;">↓ Download Template</a>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if worklog_resources %}
+  <div style="margin-bottom:48px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);border-bottom:2px solid var(--line);padding-bottom:10px;margin-bottom:20px;">WORK LOG</div>
+    {% for r in worklog_resources %}
+    <div class="resource-card" style="border-left-color:var(--gold);">
+      <div class="resource-type-tag">Work Log Template</div>
+      <div class="resource-name">{{ r.name }}</div>
+      <p style="font-size:14px;color:var(--ink-soft);line-height:1.6;">{{ r.description }}</p>
+      {% if r.how_to %}
+      <div class="resource-how-to">
+        <strong style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:6px;">HOW TO USE</strong>
+        {{ r.how_to|linebreaks }}
+      </div>
+      {% endif %}
+      {% if r.url %}<a href="{{ r.url }}" target="_blank" class="rubric-download" style="margin-top:14px;display:inline-block;">↓ Download Template</a>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if guides %}
+  <div style="margin-bottom:48px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);border-bottom:2px solid var(--line);padding-bottom:10px;margin-bottom:20px;">GUIDES</div>
+    {% for r in guides %}
+    <div class="resource-card" style="border-left-color:var(--red);">
+      <div class="resource-name">{{ r.name }}</div>
+      <p style="font-size:14px;color:var(--ink-soft);line-height:1.6;">{{ r.description }}</p>
+      {% if r.url %}<a href="{{ r.url }}" target="_blank" class="rubric-download" style="margin-top:14px;display:inline-block;">↓ Download</a>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if not portfolio_resources and not worklog_resources and not guides %}
+  <div style="background:#fff;border:1px solid var(--line);padding:64px;text-align:center;color:var(--muted);">
+    
+    <p style="font-size:15px;">Resources will be posted here soon. Check back after the first chapter meeting.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

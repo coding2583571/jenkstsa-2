@@ -1,0 +1,476 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}{{ page_title|default:"Admin" }}{% endblock %} — Jenks TSA Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Figtree:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/main.css' %}">
+  <style>
+    /* ── ADMIN LAYOUT ─────────────────────────────── */
+    body { background: #F0F1F4; }
+    .adm-layout { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+
+    /* Sidebar */
+    .adm-sidebar {
+      background: var(--ink);
+      padding: 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .adm-sidebar-head {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      flex-shrink: 0;
+    }
+    .adm-sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .adm-sidebar-brand img { width: 32px; height: 32px; border-radius: 50%; object-fit: contain; }
+    .adm-sidebar-name { font-weight: 800; font-size: 14px; color: #fff; letter-spacing: 0.02em; }
+    .adm-sidebar-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+      margin-top: 3px;
+    }
+    .adm-nav { padding: 14px 0; flex: 1; }
+    .adm-nav-section {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.25);
+      padding: 14px 20px 6px;
+    }
+    .adm-nav-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 9px 20px;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.6);
+      transition: all .15s;
+      position: relative;
+    }
+    .adm-nav-link:hover,
+    .adm-nav-link.active { color: #fff; background: rgba(255,255,255,0.07); }
+    .adm-nav-link.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--blue);
+    }
+    .adm-nav-link .adm-badge {
+      background: var(--red);
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 10px;
+      min-width: 20px;
+      text-align: center;
+    }
+    .adm-nav-link .adm-badge.blue { background: var(--blue); }
+    .adm-nav-link .adm-badge.gold { background: var(--gold); }
+
+    .adm-sidebar-foot {
+      padding: 16px 20px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      flex-shrink: 0;
+    }
+    .adm-sidebar-foot a {
+      display: block;
+      font-size: 12.5px;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 6px;
+      transition: color .15s;
+    }
+    .adm-sidebar-foot a:hover { color: rgba(255,255,255,0.8); }
+
+    /* Main content */
+    .adm-main { padding: 0; overflow: hidden; }
+    .adm-topbar {
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      padding: 0 32px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .adm-page-title {
+      font-family: 'Figtree', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--ink);
+    }
+    .adm-topbar-actions { display: flex; align-items: center; gap: 12px; }
+    .adm-user-pill {
+      font-size: 12.5px;
+      color: var(--muted);
+      padding: 4px 12px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+    }
+    .adm-content { padding: 32px; }
+
+    /* Stats cards */
+    .adm-stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+    .adm-stat-card { background: #fff; border: 1px solid var(--line); border-top: 3px solid var(--blue); padding: 20px 22px; }
+    .adm-stat-card.red { border-top-color: var(--red); }
+    .adm-stat-card.gold { border-top-color: var(--gold); }
+    .adm-stat-card.green { border-top-color: #22863A; }
+    .adm-stat-num {
+      font-family: 'Fraunces', serif;
+      font-weight: 900;
+      font-size: 36px;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+    .adm-stat-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* Data table */
+    .adm-table-wrap { background: #fff; border: 1px solid var(--line); overflow: hidden; }
+    .adm-table-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line);
+    }
+    .adm-table-title { font-weight: 700; font-size: 14px; color: var(--ink); }
+    table.adm-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+    .adm-table th {
+      text-align: left;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8.5px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--line);
+      background: #FAFAFA;
+    }
+    .adm-table td { padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+    .adm-table tr:last-child td { border-bottom: none; }
+    .adm-table tr:hover td { background: var(--blue-soft); }
+    .adm-table td a { color: var(--blue); font-weight: 600; }
+
+    /* Status badges */
+    .status-badge {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8.5px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      border-radius: 2px;
+      font-weight: 600;
+    }
+    .status-pending { background: #F3F4F6; color: var(--muted); }
+    .status-contacted { background: var(--blue-soft); color: var(--blue-deep); }
+    .status-committed { background: #FEF3C7; color: #92400E; }
+    .status-payment_pending { background: #FEE2E2; color: #991B1B; }
+    .status-completed { background: #D1FAE5; color: #065F46; }
+    .status-declined { background: #F3F4F6; color: #9CA3AF; }
+
+    /* Section card */
+    .adm-section-card { background: #fff; border: 1px solid var(--line); margin-bottom: 20px; }
+    .adm-section-card-head {
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .adm-section-card-title { font-weight: 700; font-size: 14px; color: var(--ink); }
+    .adm-section-card-body { padding: 22px; }
+
+    /* Form elements */
+    .adm-field { margin-bottom: 18px; }
+    .adm-field label {
+      display: block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8.5px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 7px;
+    }
+    .adm-field input[type="text"],
+    .adm-field input[type="email"],
+    .adm-field input[type="number"],
+    .adm-field select,
+    .adm-field textarea {
+      width: 100%;
+      border: 1.5px solid var(--line);
+      padding: 9px 13px;
+      font-size: 14px;
+      color: var(--ink);
+      background: var(--paper);
+      outline: none;
+      transition: border-color .15s;
+      font-family: 'Figtree', sans-serif;
+    }
+    .adm-field input:focus,
+    .adm-field select:focus,
+    .adm-field textarea:focus { border-color: var(--blue); }
+    .adm-field textarea { resize: vertical; }
+    .adm-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    /* Inbox message item */
+    .inbox-item {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 16px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--line);
+      align-items: center;
+      transition: background .12s;
+      cursor: pointer;
+    }
+    .inbox-item:hover { background: var(--blue-soft); }
+    .inbox-item.unread { background: #FAFBFF; }
+    .inbox-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--blue);
+      flex-shrink: 0;
+    }
+    .inbox-dot.read { background: transparent; border: 1px solid var(--line); }
+    .inbox-sender { font-weight: 600; font-size: 14px; color: var(--ink); margin-bottom: 3px; }
+    .inbox-preview { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 500px; }
+    .inbox-time { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); white-space: nowrap; }
+    .inbox-type-tab {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+      overflow: hidden;
+    }
+    .inbox-tab-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9.5px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .inbox-tab-btn.active { color: var(--ink); border-bottom-color: var(--blue); }
+    .inbox-tab-badge {
+      background: var(--red);
+      color: #fff;
+      font-size: 8px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+
+    /* Content editor */
+    .content-key-item {
+      display: grid;
+      grid-template-columns: 200px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .content-key {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      color: var(--blue-deep);
+      font-weight: 600;
+    }
+    .content-val-input {
+      border: 1.5px solid var(--line);
+      padding: 7px 10px;
+      font-size: 13.5px;
+      color: var(--ink);
+      background: var(--paper);
+      outline: none;
+      width: 100%;
+      transition: border-color .15s;
+    }
+    .content-val-input:focus { border-color: var(--blue); }
+    .save-content-btn {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: var(--ink);
+      color: #fff;
+      border: none;
+      padding: 7px 14px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .15s;
+    }
+    .save-content-btn:hover { background: var(--blue); }
+    .save-ok { color: #16a34a; font-size: 12px; margin-left: 4px; display:none; }
+
+    /* Progress bar in table */
+    .mini-progress { height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; width: 80px; }
+    .mini-progress-fill { height: 100%; border-radius: 2px; }
+
+    /* Toasts */
+    .adm-toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--ink);
+      color: #fff;
+      padding: 12px 20px;
+      font-size: 13.5px;
+      font-weight: 600;
+      z-index: 9999;
+      border-left: 4px solid var(--blue);
+      box-shadow: var(--shadow-md);
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all .3s;
+    }
+    .adm-toast.show { transform: translateY(0); opacity: 1; }
+
+    @media (max-width: 900px) {
+      .adm-layout { grid-template-columns: 1fr; }
+      .adm-sidebar { position: relative; height: auto; }
+      .adm-stats-row { grid-template-columns: repeat(2,1fr); }
+    }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+<div class="adm-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="adm-sidebar">
+    <div class="adm-sidebar-head">
+      <div class="adm-sidebar-brand">
+        <img src="{% static 'img/jenkstsa_logo.png' %}" alt="Jenks TSA">
+        <div>
+          <div class="adm-sidebar-name">Jenks TSA</div>
+          <div class="adm-sidebar-tag">Admin Panel</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="adm-nav">
+      <div class="adm-nav-section">Overview</div>
+      <a href="{% url 'admin_dashboard' %}" class="adm-nav-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+        Dashboard
+      </a>
+
+      <div class="adm-nav-section">Sponsorships</div>
+      <a href="{% url 'admin_sponsorships' %}" class="adm-nav-link {% if 'sponsorship' in request.resolver_match.url_name %}active{% endif %}">
+        All Commitments
+        {% if unread_counts.sponsor_msgs %}<span class="adm-badge">{{ unread_counts.sponsor_msgs }}</span>{% endif %}
+      </a>
+
+      <div class="adm-nav-section">Messages</div>
+      <a href="{% url 'admin_messages' %}?type=sponsor" class="adm-nav-link">
+        Sponsor Inbox
+        {% if unread_counts.sponsor_msgs %}<span class="adm-badge">{{ unread_counts.sponsor_msgs }}</span>{% endif %}
+      </a>
+      <a href="{% url 'admin_messages' %}?type=student" class="adm-nav-link">
+        Student Inbox
+        {% if unread_counts.student_msgs %}<span class="adm-badge blue">{{ unread_counts.student_msgs }}</span>{% endif %}
+      </a>
+      <a href="{% url 'admin_messages' %}?type=general" class="adm-nav-link">
+        General Inbox
+        {% if unread_counts.general_msgs %}<span class="adm-badge gold">{{ unread_counts.general_msgs }}</span>{% endif %}
+      </a>
+
+      <div class="adm-nav-section">Content</div>
+      <a href="{% url 'admin_content' %}" class="adm-nav-link {% if request.resolver_match.url_name == 'admin_content' %}active{% endif %}">
+        Packet Content
+      </a>
+      <a href="{% url 'admin_posts' %}" class="adm-nav-link {% if 'post' in request.resolver_match.url_name %}active{% endif %}">
+        Blog Posts
+      </a>
+
+      <div class="adm-nav-section">Site</div>
+      <a href="{% url 'core:home' %}" class="adm-nav-link">← View Site</a>
+      <a href="/django-admin/" class="adm-nav-link">Django Admin</a>
+    </nav>
+
+    <div class="adm-sidebar-foot">
+      <span style="font-size:12px;color:rgba(255,255,255,0.35);">{{ request.user.email }}</span>
+      <a href="{% url 'accounts:logout' %}">Sign Out</a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="adm-main">
+    <div class="adm-topbar">
+      <div class="adm-page-title">{{ page_title|default:"Dashboard" }}</div>
+      <div class="adm-topbar-actions">
+        <span class="adm-user-pill">{{ request.user.full_name }}</span>
+      </div>
+    </div>
+    <div class="adm-content">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="adm-toast" id="adm-toast"></div>
+
+<script>
+function showToast(msg, color) {
+  const t = document.getElementById('adm-toast');
+  t.textContent = msg;
+  t.style.borderLeftColor = color || 'var(--blue)';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+async function postJSON(url, data) {
+  const fd = new FormData();
+  for (const [k,v] of Object.entries(data)) fd.append(k, v);
+  fd.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]')?.value || window.getCsrf?.() || '');
+  const r = await fetch(url, { method: 'POST', body: fd });
+  return r.json();
+}
+</script>
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

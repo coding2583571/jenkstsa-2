@@ -1,0 +1,138 @@
+{% extends "admin_ui/base.html" %}
+{% block content %}
+{% csrf_token %}
+
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+  <a href="{% url 'admin_posts' %}" style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);">← All Posts</a>
+  {% if post and post.is_published %}
+  <a href="{% url 'newsroom:detail' post.slug %}" target="_blank" style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--blue);">View Live</a>
+  {% endif %}
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 280px;gap:24px;align-items:start;">
+
+  <!-- Editor -->
+  <div class="adm-section-card">
+    <div class="adm-section-card-head">
+      <span class="adm-section-card-title">{% if post %}Edit Post{% else %}New Post{% endif %}</span>
+    </div>
+    <div class="adm-section-card-body">
+      <div id="save-error" class="auth-error" style="display:none;margin-bottom:16px;"></div>
+      <div id="save-ok" style="display:none;color:#16a34a;font-weight:600;font-size:14px;margin-bottom:16px;">Saved successfully.</div>
+
+      <div class="adm-field">
+        <label>Title</label>
+        <input type="text" id="post-title" value="{{ post.title|default:'' }}" placeholder="Post title…">
+      </div>
+
+      <div class="adm-field">
+        <label>
+          Content
+          <span style="font-weight:400;font-size:10px;margin-left:8px;">Use **bold** for bold, _italic_ for italic, blank lines between paragraphs</span>
+        </label>
+        <textarea id="post-content" rows="18" style="font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.65;border:1.5px solid var(--line);padding:12px 14px;width:100%;outline:none;resize:vertical;transition:border-color .15s;" placeholder="Write your post here…">{{ post.content|default:'' }}</textarea>
+      </div>
+
+      <!-- Preview strip -->
+      <div style="background:var(--cream);border:1px solid var(--line);padding:16px;margin-top:4px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">LIVE PREVIEW</div>
+        <div id="preview-out" style="font-size:14.5px;line-height:1.75;color:var(--ink-soft);"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings sidebar -->
+  <div>
+    <div class="adm-section-card" style="margin-bottom:16px;">
+      <div class="adm-section-card-head"><span class="adm-section-card-title">Publish Settings</span></div>
+      <div class="adm-section-card-body">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:16px;">
+          <input type="checkbox" id="post-published" {% if post and post.is_published %}checked{% endif %}
+            style="width:16px;height:16px;accent-color:var(--blue);">
+          <span style="font-size:14px;font-weight:600;color:var(--ink);">Published</span>
+        </label>
+        <button onclick="savePost()" class="btn-primary" style="width:100%;justify-content:center;">
+          {% if post %}Save Changes{% else %}Create Post{% endif %}
+        </button>
+      </div>
+    </div>
+
+    {% if post %}
+    <div class="adm-section-card">
+      <div class="adm-section-card-head"><span class="adm-section-card-title">Meta</span></div>
+      <div class="adm-section-card-body" style="font-size:13px;">
+        <div style="margin-bottom:10px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;">Slug</div>
+          <code style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--ink-soft);">/newsroom/{{ post.slug }}/</code>
+        </div>
+        <div style="margin-bottom:10px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;">Created</div>
+          <span style="color:var(--muted);">{{ post.created_at|date:"M j, Y g:i A" }}</span>
+        </div>
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;">Last Updated</div>
+          <span style="color:var(--muted);">{{ post.updated_at|date:"M j, Y g:i A" }}</span>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+
+{% endblock %}
+{% block extra_scripts %}
+<script>
+const POST_ID = '{{ post.id|default:"" }}';
+
+// Simple live preview
+const contentEl = document.getElementById('post-content');
+const previewEl = document.getElementById('preview-out');
+function updatePreview() {
+  let html = contentEl.value
+    .split(/\n\n+/)
+    .filter(Boolean)
+    .map(p => {
+      p = p.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      p = p.replace(/_(.+?)_/g, '<em>$1</em>');
+      return '<p style="margin-bottom:12px;">' + p.replace(/\n/g,' ') + '</p>';
+    }).join('');
+  previewEl.innerHTML = html || '<span style="color:var(--muted);font-size:13px;">Start typing to see preview&hellip;</span>';
+}
+contentEl.addEventListener('input', updatePreview);
+updatePreview();
+
+// Focus styles for textarea
+contentEl.addEventListener('focus', () => contentEl.style.borderColor='var(--blue)');
+contentEl.addEventListener('blur', () => contentEl.style.borderColor='var(--line)');
+
+async function savePost() {
+  const title = document.getElementById('post-title').value.trim();
+  const content = document.getElementById('post-content').value.trim();
+  const is_published = document.getElementById('post-published').checked ? 'on' : '';
+  const errEl = document.getElementById('save-error');
+  const okEl = document.getElementById('save-ok');
+  errEl.style.display = 'none';
+  okEl.style.display = 'none';
+  if (!title) { errEl.textContent='Title is required.'; errEl.style.display='block'; return; }
+  const url = POST_ID ? `/admin-ui/posts/${POST_ID}/` : '/admin-ui/posts/new/';
+  const fd = new FormData();
+  fd.append('title', title);
+  fd.append('content', content);
+  if (is_published) fd.append('is_published', 'on');
+  fd.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+  const r = await fetch(url, { method:'POST', body:fd });
+  const j = await r.json();
+  if (j.success) {
+    okEl.style.display='block';
+    showToast('Post saved', '#16a34a');
+    if (!POST_ID && j.id) setTimeout(()=>window.location=`/admin-ui/posts/${j.id}/`,800);
+  } else {
+    errEl.textContent = j.error||'Error saving post.';
+    errEl.style.display = 'block';
+  }
+}
+// Ctrl+S shortcut
+document.addEventListener('keydown', e => { if ((e.ctrlKey||e.metaKey) && e.key==='s') { e.preventDefault(); savePost(); } });
+</script>
+{% endblock %}

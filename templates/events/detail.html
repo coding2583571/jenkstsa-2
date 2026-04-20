@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="section-eyebrow">
+      {% if event.category %}{{ event.category }} · {% endif %}{{ event.get_level_display }}
+    </div>
+    <h1>{{ event.name }}</h1>
+    {% if event.team_size %}<p>Team size: {{ event.team_size }}</p>{% endif %}
+  </div>
+</div>
+
+<div class="content-page container" style="max-width:860px;">
+
+  <a href="{% url 'events:index' %}" class="btn-text-link" style="margin-bottom:32px;margin-top:0;">← All Events</a>
+
+  <div style="display:grid;grid-template-columns:1fr 280px;gap:40px;align-items:start;margin-top:24px;">
+
+    <div>
+      {% if event.description %}
+      <div style="margin-bottom:32px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">OVERVIEW</div>
+        <p style="font-size:16px;line-height:1.7;color:var(--ink-soft);">{{ event.description }}</p>
+      </div>
+      {% endif %}
+
+      {% if event.requirements %}
+      <div style="margin-bottom:28px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">REQUIREMENTS</div>
+        <div style="font-size:15px;line-height:1.7;color:var(--ink-soft);">{{ event.requirements|linebreaks }}</div>
+      </div>
+      {% endif %}
+
+      {% if event.eligibility %}
+      <div style="margin-bottom:28px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">ELIGIBILITY</div>
+        <div style="font-size:15px;line-height:1.7;color:var(--ink-soft);">{{ event.eligibility|linebreaks }}</div>
+      </div>
+      {% endif %}
+
+      {% if event.pre_submission_info %}
+      <div style="background:var(--cream);border-left:4px solid var(--blue);padding:20px 22px;margin-bottom:28px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--blue);margin-bottom:8px;">PRE-SUBMISSION INFO</div>
+        <div style="font-size:14.5px;line-height:1.7;color:var(--ink-soft);">{{ event.pre_submission_info|linebreaks }}</div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Sidebar -->
+    <div>
+      {% if event.rubrics.all %}
+      <div style="background:#fff;border:1px solid var(--line);border-top:3px solid var(--blue);padding:20px;margin-bottom:16px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">RUBRICS</div>
+        {% for rubric in event.rubrics.all %}
+        <div style="padding:8px 0;border-bottom:1px solid var(--line);">
+          <div style="font-size:13.5px;font-weight:600;color:var(--ink);margin-bottom:6px;">{{ rubric.name }}</div>
+          <a href="{{ rubric.url }}" target="_blank" class="rubric-download">Download →</a>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if event.forms.all %}
+      <div style="background:#fff;border:1px solid var(--line);border-top:3px solid var(--red);padding:20px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">REQUIRED FORMS</div>
+        {% for form in event.forms.all %}
+        <div style="padding:8px 0;border-bottom:1px solid var(--line);">
+          <div style="font-size:13.5px;font-weight:600;color:var(--ink);margin-bottom:4px;">{{ form.name }}</div>
+          {% if form.is_required %}<span style="font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:var(--red);">Required</span>{% endif %}
+          {% if form.url %}<br><a href="{{ form.url }}" target="_blank" class="rubric-download" style="margin-top:4px;">Download →</a>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

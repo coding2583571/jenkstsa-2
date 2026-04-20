@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="post-page">
+  <a href="{% url 'newsroom:index' %}" class="btn-text-link" style="margin-bottom:32px;margin-top:0;">← Newsroom</a>
+
+  <div class="post-header" style="margin-top:20px;">
+    <div class="section-eyebrow">JENKS TSA</div>
+    <h1 class="post-title">{{ post.title }}</h1>
+    <div class="post-meta">
+      <div style="display:flex;align-items:center;gap:10px;">
+        {% if post.author.avatar %}
+          <img src="{{ post.author.avatar.url }}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;" alt="{{ post.author.full_name }}">
+        {% else %}
+          <div style="width:32px;height:32px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;">
+            {{ post.author.first_name|first|default:"J" }}
+          </div>
+        {% endif %}
+        <span class="post-author">{{ post.author.full_name|default:"Jenks TSA" }}</span>
+      </div>
+      <span class="post-date">{{ post.published_at|date:"F j, Y" }}</span>
+    </div>
+  </div>
+
+  {% if post.cover_image %}
+  <img src="{{ post.cover_image.url }}" alt="{{ post.title }}" class="post-cover">
+  {% endif %}
+
+  <div class="post-content">
+    {{ post.parsed_content|safe }}
+  </div>
+
+  <div style="border-top:2px solid var(--line);margin-top:56px;padding-top:28px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
+    <a href="{% url 'newsroom:index' %}" class="btn-outline">← Back to Newsroom</a>
+    <div style="display:flex;gap:10px;">
+      <a href="https://instagram.com/jenkstsa" target="_blank" class="btn-outline" style="font-size:13px;padding:8px 16px;">Follow @jenkstsa</a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

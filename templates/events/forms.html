@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="section-eyebrow">COMPETITION PAPERWORK</div>
+    <h1>Required <em>Forms.</em></h1>
+    <p>Download and complete these forms before submitting to your event coordinator.</p>
+  </div>
+</div>
+<div class="content-page container">
+  {% if standalone_forms %}
+  <div class="rubric-group">
+    <div class="rubric-group-name">General Forms</div>
+    {% for form in standalone_forms %}
+    <div class="rubric-item">
+      <div>
+        <div class="rubric-item-name">{{ form.name }}</div>
+        {% if form.description %}<div style="font-size:13px;color:var(--muted);margin-top:3px;">{{ form.description }}</div>{% endif %}
+        {% if form.is_required %}<span style="font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.12em;text-transform:uppercase;background:#FEE2E2;color:#991B1B;padding:2px 8px;margin-top:4px;display:inline-block;">Required</span>{% endif %}
+      </div>
+      {% if form.url %}
+      <a href="{{ form.url }}" target="_blank" class="rubric-download">↓ Download</a>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% for event in events %}
+  {% if event.forms.all %}
+  <div class="rubric-group">
+    <div class="rubric-group-name">{{ event.name }}</div>
+    {% for form in event.forms.all %}
+    <div class="rubric-item">
+      <div>
+        <div class="rubric-item-name">{{ form.name }}</div>
+        {% if form.description %}<div style="font-size:13px;color:var(--muted);margin-top:3px;">{{ form.description }}</div>{% endif %}
+        {% if form.is_required %}<span style="font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.12em;text-transform:uppercase;background:#FEE2E2;color:#991B1B;padding:2px 8px;margin-top:4px;display:inline-block;">Required</span>{% endif %}
+      </div>
+      {% if form.url %}<a href="{{ form.url }}" target="_blank" class="rubric-download">↓ Download</a>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% endfor %}
+
+  {% if not standalone_forms and not events %}
+  <div style="background:#fff;border:1px solid var(--line);padding:48px;text-align:center;color:var(--muted);">
+    <p style="font-size:15px;">No forms have been posted yet. Check back closer to the competition season.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

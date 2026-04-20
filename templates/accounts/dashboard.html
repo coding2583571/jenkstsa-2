@@ -1,0 +1,127 @@
+{% load static %}
+{% extends "base.html" %}
+{% block content %}
+<div class="dash-page">
+
+  <!-- HEADER -->
+  <div class="dash-header">
+    <div class="dash-welcome">
+      {% if user.first_name %}Hello, {{ user.first_name }}.{% else %}Your Dashboard.{% endif %}
+    </div>
+    <div class="dash-role-tag">{{ user.get_role_display }}</div>
+  </div>
+
+  {% if user.is_sponsor %}
+  <!-- ── SPONSOR DASHBOARD ─────────────────────────── -->
+  <div class="dash-section">
+    <div class="dash-section-title">My Sponsorship Requests</div>
+
+    {% if commitments %}
+      {% for c in commitments %}
+      <a href="{% url 'packet:progress' c.confirmation_number %}" class="commitment-card" style="display:block;text-decoration:none;">
+        <div class="cc-head">
+          <span class="cc-conf">{{ c.confirmation_number }}</span>
+          <span class="cc-status" style="background:{{ c.status_display_color }}20;color:{{ c.status_display_color }};">
+            {{ c.get_status_display }}
+          </span>
+        </div>
+        <div class="cc-company">{{ c.company }}</div>
+        {% if c.tier %}<div style="font-size:13px;color:var(--muted);margin-bottom:8px;">{{ c.tier.name }} Tier</div>{% endif %}
+        <div class="progress-mini-track">
+          <div class="progress-mini-fill" style="width:{{ c.status_percent }}%;background:{{ c.status_display_color }};"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);">
+          <span>Submitted {{ c.created_at|date:"M j, Y" }}</span>
+          <span>View Details →</span>
+        </div>
+      </a>
+      {% endfor %}
+    {% else %}
+      <div style="background:#fff;border:1px solid var(--line);padding:28px;text-align:center;color:var(--muted);font-size:14px;">
+        No sponsorship requests linked yet.
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Link a commitment -->
+  <div class="dash-section">
+    <div class="dash-section-title">Link an Existing Request</div>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:16px;">
+      Already submitted a sponsorship request without an account? Link it here using your confirmation number and email.
+    </p>
+    <div class="link-form-card">
+      <div id="link-error" class="auth-error" style="display:none;"></div>
+      <div id="link-success" style="display:none;color:#16a34a;font-weight:600;font-size:14px;margin-bottom:12px;">
+        ✓ Commitment linked successfully! Refreshing…
+      </div>
+      <form id="link-commitment-form">
+        {% csrf_token %}
+        <div class="auth-form-field">
+          <label>Confirmation Number</label>
+          <input type="text" name="confirmation_number" placeholder="TSA-XXXXXXXX" style="text-transform:uppercase;" required>
+        </div>
+        <div class="auth-form-field">
+          <label>Email on the request</label>
+          <input type="email" name="email" required>
+        </div>
+        <button type="submit" class="btn-primary" style="margin-top:8px;">Link Commitment</button>
+      </form>
+    </div>
+  </div>
+
+  {% elif user.is_student %}
+  <!-- ── STUDENT DASHBOARD ──────────────────────────── -->
+  <div class="dash-section">
+    <div class="dash-section-title">Quick Access</div>
+    <a href="{% url 'events:index' %}" class="dash-link-card">
+      <div>
+        <div style="font-weight:700;font-size:15px;color:var(--ink);">Event Information</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:3px;">Browse events, eligibility, and requirements</div>
+      </div>
+      <span style="color:var(--blue);font-size:18px;">→</span>
+    </a>
+    <a href="{% url 'events:rubrics' %}" class="dash-link-card">
+      <div>
+        <div style="font-weight:700;font-size:15px;color:var(--ink);">Rubrics</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:3px;">Download scoring rubrics for all events</div>
+      </div>
+      <span style="color:var(--blue);font-size:18px;">→</span>
+    </a>
+    <a href="{% url 'events:resources' %}" class="dash-link-card">
+      <div>
+        <div style="font-weight:700;font-size:15px;color:var(--ink);">Templates & Resources</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:3px;">Documentation portfolios, work logs, guides</div>
+      </div>
+      <span style="color:var(--blue);font-size:18px;">→</span>
+    </a>
+    <a href="{% url 'events:forms' %}" class="dash-link-card">
+      <div>
+        <div style="font-weight:700;font-size:15px;color:var(--ink);">Required Forms</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:3px;">Download and complete event forms</div>
+      </div>
+      <span style="color:var(--blue);font-size:18px;">→</span>
+    </a>
+  </div>
+
+  {% elif user.is_admin %}
+  <!-- ── ADMIN DASHBOARD ────────────────────────────── -->
+  <div class="dash-section">
+    <div class="dash-section-title">Admin Access</div>
+    <a href="{% url 'admin_dashboard' %}" class="btn-primary">Go to Admin Dashboard →</a>
+  </div>
+  {% endif %}
+
+  <!-- Profile section (all roles) -->
+  <div class="dash-section">
+    <div class="dash-section-title">Account</div>
+    <div style="background:#fff;border:1px solid var(--line);padding:20px 24px;display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-weight:700;font-size:15px;">{{ user.full_name }}</div>
+        <div style="font-size:13px;color:var(--muted);">{{ user.email }}</div>
+      </div>
+      <a href="{% url 'accounts:logout' %}" class="btn-outline" style="font-size:13px;padding:8px 16px;">Sign Out</a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

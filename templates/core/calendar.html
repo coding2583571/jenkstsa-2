@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="section-eyebrow">SCHEDULE</div>
+    <h1>Chapter <em>Calendar.</em></h1>
+    <p>Competition dates, meetings, and chapter events — all in one place.</p>
+  </div>
+</div>
+
+<div class="calendar-page container">
+  {% if calendar_embed %}
+    <div class="calendar-embed-wrap">
+      {{ calendar_embed|safe }}
+    </div>
+  {% else %}
+    <div style="background:#fff;border:2px dashed var(--line);padding:64px;text-align:center;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">CALENDAR COMING SOON</div>
+      <p style="color:var(--muted);font-size:15px;">Our Google Calendar embed will appear here.<br>Check back soon or follow us on Instagram for updates.</p>
+      <a href="https://instagram.com/jenkstsa" target="_blank" style="display:inline-block;margin-top:20px;" class="btn-outline">@jenkstsa on Instagram →</a>
+    </div>
+  {% endif %}
+</div>
+
+{% endblock %}

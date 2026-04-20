@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="section-eyebrow">SCORING GUIDES</div>
+    <h1>Event <em>Rubrics.</em></h1>
+    <p>Download the official TSA scoring rubrics for all active events. No account required.</p>
+  </div>
+</div>
+
+<div class="content-page container">
+  <div class="content-page-header">
+    <p>
+      Rubrics are the official judging criteria used at regional, state, and national TSA conferences.
+      Review them early — they tell you exactly what judges look for.
+    </p>
+  </div>
+
+  {% if events %}
+    {% for event in events %}
+    <div class="rubric-group">
+      <div class="rubric-group-name">{{ event.name }}</div>
+      {% if event.category %}
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;">
+        {{ event.category }} · {{ event.get_level_display }}
+      </div>
+      {% endif %}
+      {% for rubric in event.rubrics.all %}
+      <div class="rubric-item">
+        <div>
+          <div class="rubric-item-name">{{ rubric.name }}</div>
+          {% if rubric.description %}<div style="font-size:13px;color:var(--muted);margin-top:3px;">{{ rubric.description }}</div>{% endif %}
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;flex-shrink:0;">
+          <span class="rubric-item-year">{{ rubric.year }}</span>
+          {% if rubric.url %}
+          <a href="{{ rubric.url }}" target="_blank" rel="noopener" class="rubric-download">
+            ↓ Download
+          </a>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  {% else %}
+    <div style="background:#fff;border:1px solid var(--line);padding:48px;text-align:center;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">COMING SOON</div>
+      <p style="color:var(--muted);font-size:15px;">Rubrics will be posted here once the season begins. Check back after the first chapter meeting.</p>
+    </div>
+  {% endif %}
+
+  <div style="margin-top:48px;background:var(--cream);border-left:4px solid var(--gold);padding:20px 24px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;">NATIONAL TSA RESOURCES</div>
+    <p style="font-size:14px;color:var(--ink-soft);line-height:1.6;">
+      For additional event documentation, performance indicators, and official rules, visit the
+      <a href="https://tsaweb.org/competitions-programs/tsa/high-school-competitions" target="_blank" rel="noopener" style="color:var(--blue);font-weight:600;">TSA National Competitions page</a>.
+    </p>
+  </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="auth-page">
+  <div class="auth-card">
+    <img src="{% static 'img/jenkstsa_logo.png' %}" alt="Jenks TSA" class="auth-logo">
+    <h1 class="auth-title">Link a commitment.</h1>
+    <p class="auth-sub">Connect an existing sponsorship request to your account using your confirmation number and email.</p>
+
+    <div id="link-error" class="auth-error" style="display:none;"></div>
+    <div id="link-success" style="display:none;color:#16a34a;font-weight:600;font-size:14px;margin-bottom:16px;">✓ Linked! Redirecting…</div>
+
+    <form id="link-commitment-form">
+      {% csrf_token %}
+      <div class="auth-form-field">
+        <label>Confirmation Number</label>
+        <input type="text" name="confirmation_number" placeholder="TSA-XXXXXXXX" required style="text-transform:uppercase;letter-spacing:0.05em;">
+      </div>
+      <div class="auth-form-field">
+        <label>Email on the request</label>
+        <input type="email" name="email" required {% if user.is_authenticated %}value="{{ user.email }}"{% endif %}>
+      </div>
+      <button type="submit" class="auth-submit">Link Commitment</button>
+    </form>
+
+    <div class="auth-footer">
+      <a href="{% url 'packet:status' %}">Look up status without linking →</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+document.getElementById('link-commitment-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const errEl = document.getElementById('link-error');
+  const okEl = document.getElementById('link-success');
+  errEl.style.display = 'none';
+  const res = await fetch('/accounts/link-commitment/', { method:'POST', headers:{'X-CSRFToken':fd.get('csrfmiddlewaretoken')}, body:fd });
+  const j = await res.json();
+  if (j.success) { okEl.style.display='block'; setTimeout(()=>window.location='/accounts/dashboard/',1500); }
+  else { errEl.textContent = j.error; errEl.style.display='block'; }
+});
+</script>
+{% endblock %}

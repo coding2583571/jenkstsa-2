@@ -1,0 +1,430 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/packet.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- PACKET NAV STRIP -->
+<div class="pkt-nav-strip no-print">
+  <div class="pkt-nav-inner">
+    <div class="pkt-nav-links">
+      <a href="#cover" class="pkt-nav-link">Overview</a>
+      <a href="#who" class="pkt-nav-link">Who We Are</a>
+      <a href="#ask" class="pkt-nav-link">The Ask</a>
+      <a href="#tiers" class="pkt-nav-link">Tiers</a>
+      <a href="#partner" class="pkt-nav-link">Other Ways</a>
+      <a href="#commit" class="pkt-nav-link">Commit</a>
+    </div>
+    <button onclick="window.print()" class="pkt-print-btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      Print This Sponsorship Packet
+    </button>
+  </div>
+</div>
+
+<!-- ===== SECTION 1: COVER ===== -->
+<section class="pkt-section pkt-cover" id="cover">
+  <div class="pkt-cover-inner">
+    <div class="pkt-cover-top">
+      <div class="pkt-cover-brand">
+        <img src="{% static 'img/jenkstsa_logo.png' %}" alt="Jenks TSA">
+        <div>
+          <div class="pkt-cover-org">{{ cover_eyebrow }}</div>
+          <div class="pkt-cover-year">SPONSORSHIP PROSPECTUS / {{ cover_year }}</div>
+        </div>
+      </div>
+      <div class="pkt-cover-deadline-badge">{{ cover_deadline }}</div>
+    </div>
+
+    <div class="pkt-cover-main">
+      <div class="pkt-eyebrow-line">
+        <span class="pkt-eyebrow-bar"></span>
+        TECHNOLOGY STUDENT ASSOCIATION
+      </div>
+      <h1 class="pkt-cover-h1">{{ cover_title }}</h1>
+      <p class="pkt-cover-lede">{{ cover_lede }}</p>
+    </div>
+
+    <div class="pkt-stats-grid">
+      {% for stat in cover_stats %}
+      <div class="pkt-stat">
+        <div class="pkt-stat-num">{{ stat.number }}<span class="pkt-stat-unit">{{ stat.unit }}</span></div>
+        <div class="pkt-stat-label">{{ stat.label }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION 2: WHO WE ARE ===== -->
+<section class="pkt-section pkt-light" id="who">
+  <div class="pkt-container">
+    <div class="pkt-eyebrow">
+      <span class="pkt-eyebrow-bar"></span>{{ who_eyebrow }}
+    </div>
+    <h2 class="pkt-section-h2">{{ who_title|safe }}</h2>
+
+    <div class="pkt-two-col">
+      <div class="pkt-col-main">
+        <p class="pkt-lede-para">{{ who_lede }}</p>
+        <p class="pkt-body-para">{{ who_body1 }}</p>
+        <p class="pkt-body-para">{{ who_body2 }}</p>
+        <div class="pkt-callout">
+          <div class="pkt-callout-label">{{ callout_label }}</div>
+          <p>{{ callout_text }}</p>
+        </div>
+      </div>
+
+      <div class="pkt-col-side">
+        <div class="pkt-results-card">
+          <div class="pkt-results-head">— {{ results_head }} —</div>
+          <h3 class="pkt-results-title">{{ results_title }}</h3>
+          {% for finish in podium_finishes %}
+          <div class="pkt-result-row">
+            <div class="pkt-place {% if finish.place == '1st' %}gold{% endif %}">{{ finish.place }}</div>
+            <div class="pkt-event-name">{{ finish.event_name }}</div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION 3: THE ASK ===== -->
+<section class="pkt-section pkt-cream" id="ask">
+  <div class="pkt-container">
+    <div class="pkt-eyebrow">
+      <span class="pkt-eyebrow-bar"></span>WHAT YOUR DOLLARS DO
+    </div>
+    <h2 class="pkt-section-h2">The <em>ask.</em></h2>
+
+    <div class="pkt-ask-hero">
+      <div class="pkt-ask-label">{{ ask_label }}</div>
+      <div class="pkt-ask-amount"><span class="pkt-ask-dollar">$</span>{{ ask_amount }}</div>
+      <p class="pkt-ask-copy">{{ ask_copy }}</p>
+    </div>
+
+    <div class="pkt-budget-grid">
+      {% for item in budget_items %}
+      <div class="pkt-budget-item">
+        <div class="pkt-budget-amt">{{ item.amount }}</div>
+        <div class="pkt-budget-title">{{ item.title }}</div>
+        <div class="pkt-budget-desc">{{ item.description }}</div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="pkt-tax-grid">
+      {% for card in tax_cards %}
+      <div class="pkt-tax-card">
+        <div class="pkt-tax-badge">{{ card.badge }}</div>
+        <h4>{{ card.title }}</h4>
+        <p>{{ card.content }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION 4: TIERS ===== -->
+<section class="pkt-section pkt-light" id="tiers">
+  <div class="pkt-container">
+    <div class="pkt-eyebrow">
+      <span class="pkt-eyebrow-bar"></span>{{ tiers_eyebrow }}
+    </div>
+    <h2 class="pkt-section-h2">{{ tiers_title|safe }}</h2>
+    <p class="pkt-tier-intro">{{ tiers_intro }}</p>
+
+    <div class="pkt-tiers-list">
+      {% for tier in tiers %}
+      <div class="pkt-tier-card {{ tier.color_class }}">
+        <div class="pkt-tier-left">
+          <div class="pkt-tier-label">TIER {{ forloop.counter }}</div>
+          <h3 class="pkt-tier-name">{{ tier.name }}</h3>
+          <div class="pkt-tier-amount">
+            <span class="pkt-amt-dollar">$</span>{{ tier.amount|cut:"$" }}
+          </div>
+        </div>
+        <div class="pkt-tier-mid">
+          {% for benefit in tier.benefits.all %}
+          <div class="pkt-tier-benefit {% if benefit.is_bold %}bold{% endif %}">{{ benefit.text }}</div>
+          {% endfor %}
+        </div>
+        <div class="pkt-tier-right">
+          {% if tier.badge_text %}
+          <span class="pkt-tier-badge {{ tier.badge_style }}">{{ tier.badge_text }}</span>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION 5: OTHER WAYS TO PARTNER ===== -->
+<section class="pkt-section pkt-cream" id="partner">
+  <div class="pkt-container">
+    <div class="pkt-eyebrow">
+      <span class="pkt-eyebrow-bar"></span>{{ partner_eyebrow }}
+    </div>
+    <h2 class="pkt-section-h2">{{ partner_title|safe }}</h2>
+    <p class="pkt-tier-intro">{{ partner_intro }}</p>
+
+    <div class="pkt-custom-grid">
+      {% for option in partner_options %}
+      <div class="pkt-custom-card">
+        <h4>{{ option.title }}</h4>
+        <p>{{ option.description }}</p>
+        {% if option.example %}
+        <div class="pkt-custom-example">{{ option.example }}</div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+
+    {% if reach_stats %}
+    <div class="pkt-reach-strip">
+      {% for stat in reach_stats %}
+      <div class="pkt-reach-item">
+        <div class="pkt-reach-num">{{ stat.number }}</div>
+        <div class="pkt-reach-label">{{ stat.label }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- ===== CURRENT SPONSORS (toggled) ===== -->
+{% if show_current_sponsors and current_sponsors %}
+<section class="pkt-section pkt-light">
+  <div class="pkt-container">
+    <div class="pkt-eyebrow">
+      <span class="pkt-eyebrow-bar"></span>CURRENT SPONSORS
+    </div>
+    <h2 class="pkt-section-h2">Our <em>partners.</em></h2>
+    <div class="pkt-sponsors-grid">
+      {% for sponsor in current_sponsors %}
+      <div class="pkt-sponsor-item tier-{{ sponsor.tier }}">
+        {% if sponsor.logo %}
+        <img src="{{ sponsor.logo.url }}" alt="{{ sponsor.name }}">
+        {% else %}
+        <div class="pkt-sponsor-name">{{ sponsor.name }}</div>
+        {% endif %}
+        <div class="pkt-sponsor-tier-tag">{{ sponsor.get_tier_display }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ===== SECTION 6: COMMITMENT / CONTACT ===== -->
+<section class="pkt-section pkt-dark" id="commit">
+  <div class="pkt-container">
+    <div class="pkt-eyebrow" style="color:rgba(255,255,255,0.5);">
+      <span class="pkt-eyebrow-bar" style="background:var(--red)"></span>READY TO PARTNER?
+    </div>
+    <h2 class="pkt-section-h2" style="color:#fff;">Let's build <em>together.</em></h2>
+
+    <div class="pkt-commit-grid">
+      <!-- FORM -->
+      <div class="pkt-commit-form" id="pkt-form">
+        <div class="pkt-form-head">
+          <h3>Sponsorship Commitment</h3>
+          <div class="pkt-form-id">FORM 001 / {{ form_year }}</div>
+        </div>
+        <form id="commitment-form" novalidate>
+          {% csrf_token %}
+          <div class="pkt-form-row">
+            <div class="pkt-form-field">
+              <label for="company">Company / Organization</label>
+              <input type="text" id="company" name="company" required autocomplete="organization">
+            </div>
+            <div class="pkt-form-field">
+              <label for="contact_name">Primary Contact</label>
+              <input type="text" id="contact_name" name="contact_name" required autocomplete="name">
+            </div>
+          </div>
+          <div class="pkt-form-row">
+            <div class="pkt-form-field">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" required autocomplete="email">
+            </div>
+            <div class="pkt-form-field">
+              <label for="phone">Phone</label>
+              <input type="tel" id="phone" name="phone" autocomplete="tel">
+            </div>
+          </div>
+
+          <div class="pkt-form-label-mono">Select Your Tier</div>
+          <div class="pkt-tier-select">
+            {% for tier in tiers %}
+            <label class="pkt-tier-pick">
+              <input type="radio" name="tier_id" value="{{ tier.id }}">
+              <div class="pkt-pick-box">
+                <div class="pkt-pick-name">{{ tier.name }}</div>
+                <div class="pkt-pick-amt">{{ tier.amount }}</div>
+                <div class="pkt-pick-check"></div>
+              </div>
+            </label>
+            {% endfor %}
+          </div>
+
+          <div class="pkt-form-row" style="margin-top:16px;">
+            <div class="pkt-form-field">
+              <label for="contribution_amount">Contribution Amount ($)</label>
+              <input type="number" id="contribution_amount" name="contribution_amount" min="0" step="0.01">
+            </div>
+            <div class="pkt-form-field">
+              <label for="in_kind_value">In-Kind Value (if applicable)</label>
+              <input type="number" id="in_kind_value" name="in_kind_value" min="0" step="0.01">
+            </div>
+          </div>
+
+          <div id="form-error" class="pkt-form-error" hidden></div>
+          <button type="submit" class="pkt-submit-btn" id="submit-btn">
+            Submit Sponsorship Interest
+          </button>
+        </form>
+      </div>
+
+      <!-- CONTACT INFO -->
+      <div class="pkt-contact-col">
+        {% if contact_program %}
+        <div class="pkt-contact-block">
+          <h4>Program Contact</h4>
+          {% for item in contact_program %}
+          <div class="pkt-contact-item">
+            <strong>{{ item.label }}</strong>
+            <div class="pkt-contact-content">{{ item.content|linebreaksbr }}</div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if contact_payment %}
+        <div class="pkt-contact-block">
+          <h4>Payment Processing</h4>
+          {% for item in contact_payment %}
+          <div class="pkt-contact-item">
+            <strong>{{ item.label }}</strong>
+            <div class="pkt-contact-content">{{ item.content|linebreaksbr }}</div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="pkt-motto-block no-print">
+          <div class="pkt-motto">{{ motto }}</div>
+          <div class="pkt-url">JENKSTSA.ORG</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status check button (hidden during print) -->
+    <div class="pkt-status-row no-print">
+      <a href="{% url 'packet:status' %}" class="pkt-status-link">
+        Already filled the form out? Check sponsorship status →
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- SUCCESS MODAL -->
+<div class="pkt-modal-overlay" id="success-modal" hidden>
+  <div class="pkt-modal">
+    <div class="pkt-modal-icon">✓</div>
+    <h3>Submission Received</h3>
+    <p>Your sponsorship interest has been logged. Your confirmation number is:</p>
+    <div class="pkt-modal-confirmation" id="modal-confirmation"></div>
+    <p class="pkt-modal-sub">We'll reach out within 2–3 business days. You can track your status anytime.</p>
+    <div class="pkt-modal-actions">
+      <a href="#" id="modal-view-status" class="btn-primary">View Status Page</a>
+      <button onclick="document.getElementById('success-modal').hidden=true" class="btn-outline">Close</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function(){
+  // Smooth scroll for packet nav
+  document.querySelectorAll('.pkt-nav-link').forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(link.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  // Highlight active section
+  const sections = document.querySelectorAll('.pkt-section[id]');
+  const navLinks = document.querySelectorAll('.pkt-nav-link');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.pkt-nav-link[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { threshold: 0.3 });
+  sections.forEach(s => observer.observe(s));
+
+  // Tier card selection highlight
+  document.querySelectorAll('.pkt-tier-pick input').forEach(radio => {
+    radio.addEventListener('change', () => {
+      document.querySelectorAll('.pkt-tier-pick').forEach(p => p.classList.remove('selected'));
+      radio.closest('.pkt-tier-pick').classList.add('selected');
+    });
+  });
+
+  // Form submission
+  const form = document.getElementById('commitment-form');
+  const submitBtn = document.getElementById('submit-btn');
+  const formError = document.getElementById('form-error');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting…';
+    formError.hidden = true;
+
+    const data = new FormData(form);
+
+    try {
+      const res = await fetch('{% url "packet:commit" %}', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': data.get('csrfmiddlewaretoken') },
+        body: data,
+      });
+      const json = await res.json();
+
+      if (json.success) {
+        document.getElementById('modal-confirmation').textContent = json.confirmation_number;
+        document.getElementById('modal-view-status').href = '/packet/confirmation/' + json.confirmation_number + '/';
+        document.getElementById('success-modal').hidden = false;
+        form.reset();
+        document.querySelectorAll('.pkt-tier-pick').forEach(p => p.classList.remove('selected'));
+      } else {
+        formError.textContent = json.error || 'Something went wrong.';
+        formError.hidden = false;
+      }
+    } catch(err) {
+      formError.textContent = 'Network error. Please try again.';
+      formError.hidden = false;
+    }
+
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Submit Sponsorship Interest';
+  });
+})();
+</script>
+{% endblock %}

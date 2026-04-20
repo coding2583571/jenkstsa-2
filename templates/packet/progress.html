@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load static %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/packet.css' %}">{% endblock %}
+
+{% block content %}
+<div class="progress-page">
+  <div class="progress-card">
+    <div class="progress-header">
+      <div class="progress-conf-num">{{ commitment.confirmation_number }}</div>
+      <div class="progress-company">{{ commitment.company }}</div>
+    </div>
+
+    <div class="progress-status-section">
+      <div class="progress-status-label">Current Status</div>
+      <div class="progress-status-name" style="color:{{ commitment.status_display_color }}">
+        {{ commitment.get_status_display }}
+      </div>
+
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" style="width:{{ commitment.status_percent }}%; background:{{ commitment.status_display_color }}"></div>
+      </div>
+      <div class="progress-steps">
+        {% for value, label in statuses %}
+        <div class="progress-step {% if commitment.status == value %}active{% endif %}">{{ label }}</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="progress-info-grid">
+      <div class="prog-info-item">
+        <div class="prog-info-label">Contact</div>
+        <div class="prog-info-value">{{ commitment.contact_name }}</div>
+      </div>
+      <div class="prog-info-item">
+        <div class="prog-info-label">Email</div>
+        <div class="prog-info-value">{{ commitment.email }}</div>
+      </div>
+      {% if commitment.tier %}
+      <div class="prog-info-item">
+        <div class="prog-info-label">Tier</div>
+        <div class="prog-info-value">{{ commitment.tier.name }}</div>
+      </div>
+      {% endif %}
+      {% if commitment.contribution_amount %}
+      <div class="prog-info-item">
+        <div class="prog-info-label">Amount</div>
+        <div class="prog-info-value">${{ commitment.contribution_amount }}</div>
+      </div>
+      {% endif %}
+      <div class="prog-info-item">
+        <div class="prog-info-label">Submitted</div>
+        <div class="prog-info-value">{{ commitment.created_at|date:"F j, Y" }}</div>
+      </div>
+    </div>
+
+    {% if commitment.status_note %}
+    <div class="prog-note-box">
+      <div class="prog-note-label">NOTE FROM JENKS TSA</div>
+      <p>{{ commitment.status_note }}</p>
+    </div>
+    {% endif %}
+
+    <div class="progress-actions">
+      <button class="btn-outline" onclick="navigator.clipboard.writeText(window.location.href).then(()=>alert('Link copied!'))">Copy This Page Link</button>
+      <a href="{% url 'packet:status' %}" class="btn-text-link">Look up a different commitment →</a>
+    </div>
+
+    <!-- Message section -->
+    <div class="prog-message-section">
+      <h4>Send a Message</h4>
+      {% if user.is_authenticated %}
+        <p>Logged in as {{ user.email }}</p>
+      {% else %}
+        <div class="pkt-form-row">
+          <div class="pkt-form-field"><label>Name</label><input type="text" id="msg-name" value="{{ commitment.contact_name }}"></div>
+          <div class="pkt-form-field"><label>Email</label><input type="email" id="msg-email" value="{{ commitment.email }}"></div>
+        </div>
+      {% endif %}
+      <div class="pkt-form-field" style="margin-top:12px;">
+        <label>Message</label>
+        <textarea id="msg-content" rows="3" placeholder="Questions, updates..."></textarea>
+      </div>
+      <div id="msg-error" class="pkt-form-error" hidden></div>
+      <button class="pkt-submit-btn" style="margin-top:12px;" onclick="sendMsg()">Send</button>
+      <div id="msg-ok" hidden style="color:var(--blue);margin-top:8px;font-weight:600;">Sent!</div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+async function sendMsg() {
+  const content = document.getElementById('msg-content').value.trim();
+  const fd = new FormData();
+  {% if user.is_authenticated %}
+  fd.append('name', '{{ user.full_name }}');
+  fd.append('email', '{{ user.email }}');
+  {% else %}
+  fd.append('name', document.getElementById('msg-name').value);
+  fd.append('email', document.getElementById('msg-email').value);
+  {% endif %}
+  fd.append('content', content);
+  fd.append('commitment_id', '{{ commitment.id }}');
+  fd.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+  const r = await fetch('/messages/send/', { method: 'POST', body: fd });
+  const j = await r.json();
+  if (j.success) {
+    document.getElementById('msg-content').value = '';
+    document.getElementById('msg-ok').hidden = false;
+    setTimeout(() => document.getElementById('msg-ok').hidden = true, 3000);
+  } else {
+    document.getElementById('msg-error').textContent = j.error;
+    document.getElementById('msg-error').hidden = false;
+  }
+}
+</script>
+{% endblock %}

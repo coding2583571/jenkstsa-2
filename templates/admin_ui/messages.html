@@ -1,0 +1,51 @@
+{% extends "admin_ui/base.html" %}
+{% block content %}
+{% csrf_token %}
+
+<div class="adm-table-wrap">
+  <!-- Type tabs -->
+  <div class="inbox-type-tab">
+    <a href="{% url 'admin_messages' %}" class="inbox-tab-btn {% if not type_filter %}active{% endif %}">
+      All
+      {% with t=unread_counts.sponsor_msgs|add:unread_counts.student_msgs|add:unread_counts.general_msgs %}
+      {% if t %}<span class="inbox-tab-badge">{{ t }}</span>{% endif %}
+      {% endwith %}
+    </a>
+    <a href="{% url 'admin_messages' %}?type=sponsor" class="inbox-tab-btn {% if type_filter == 'sponsor' %}active{% endif %}">
+      Sponsors
+      {% if unread_counts.sponsor_msgs %}<span class="inbox-tab-badge">{{ unread_counts.sponsor_msgs }}</span>{% endif %}
+    </a>
+    <a href="{% url 'admin_messages' %}?type=student" class="inbox-tab-btn {% if type_filter == 'student' %}active{% endif %}">
+      Students
+      {% if unread_counts.student_msgs %}<span class="inbox-tab-badge" style="background:var(--gold);">{{ unread_counts.student_msgs }}</span>{% endif %}
+    </a>
+    <a href="{% url 'admin_messages' %}?type=general" class="inbox-tab-btn {% if type_filter == 'general' %}active{% endif %}">
+      General
+      {% if unread_counts.general_msgs %}<span class="inbox-tab-badge" style="background:var(--muted);">{{ unread_counts.general_msgs }}</span>{% endif %}
+    </a>
+  </div>
+
+  {% for msg in messages %}
+  <a href="{% url 'admin_message_detail' msg.id %}" class="inbox-item {% if not msg.is_read %}unread{% endif %}" style="text-decoration:none;">
+    <div class="inbox-dot {% if msg.is_read %}read{% endif %}"></div>
+    <div style="overflow:hidden;">
+      <div class="inbox-sender">
+        {{ msg.sender_name }}
+        <span style="font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-weight:400;margin-left:8px;">{{ msg.message_type }}</span>
+        {% if msg.related_commitment %}
+        <span style="font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);font-weight:400;margin-left:6px;">{{ msg.related_commitment.confirmation_number }}</span>
+        {% endif %}
+      </div>
+      <div class="inbox-preview">{{ msg.content|truncatechars:100 }}</div>
+    </div>
+    <div class="inbox-time">{{ msg.created_at|date:"M j, g:i A" }}</div>
+  </a>
+  {% empty %}
+  <div style="padding:48px;text-align:center;color:var(--muted);">
+    
+    <p style="font-size:15px;">No messages in this inbox.</p>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

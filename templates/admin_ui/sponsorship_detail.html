@@ -1,0 +1,129 @@
+{% extends "admin_ui/base.html" %}
+{% block content %}
+{% csrf_token %}
+
+<div style="margin-bottom:20px;">
+  <a href="{% url 'admin_sponsorships' %}" style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);">← All Commitments</a>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 340px;gap:24px;align-items:start;">
+
+  <!-- LEFT: Details -->
+  <div>
+    <div class="adm-section-card">
+      <div class="adm-section-card-head">
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);">{{ commitment.confirmation_number }}</div>
+          <div style="font-family:'Fraunces',serif;font-weight:900;font-size:26px;color:var(--ink);">{{ commitment.company }}</div>
+        </div>
+        <span class="status-badge status-{{ commitment.status }}">{{ commitment.get_status_display }}</span>
+      </div>
+      <div class="adm-section-card-body">
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:0;border:1px solid var(--line);">
+          {% for label, val in info_rows %}
+          <div style="padding:12px 16px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">{{ label }}</div>
+            <div style="font-size:14px;color:var(--ink);font-weight:600;">{{ val|default:"—" }}</div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Progress bar -->
+        <div style="margin-top:20px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Progress</div>
+          <div style="height:8px;background:var(--line);border-radius:4px;overflow:hidden;">
+            <div style="height:100%;width:{{ commitment.status_percent }}%;background:{{ commitment.status_display_color }};border-radius:4px;transition:width .5s;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Messages thread -->
+    <div class="adm-section-card">
+      <div class="adm-section-card-head">
+        <span class="adm-section-card-title">Messages ({{ messages.count }})</span>
+      </div>
+      <div>
+        {% for msg in messages %}
+        <div style="padding:16px 22px;border-bottom:1px solid var(--line);">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+            <span style="font-weight:600;font-size:13.5px;">{{ msg.sender_name }}</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--muted);">{{ msg.created_at|date:"M j, Y g:i A" }}</span>
+          </div>
+          <p style="font-size:14px;color:var(--ink-soft);line-height:1.6;">{{ msg.content }}</p>
+          {% for reply in msg.replies.all %}
+          <div style="margin-top:12px;padding:12px 14px;background:var(--blue-soft);border-left:3px solid var(--blue);">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--blue);margin-bottom:4px;">Admin Reply — {{ reply.created_at|date:"M j, g:i A" }}</div>
+            <p style="font-size:13.5px;color:var(--ink-soft);">{{ reply.content }}</p>
+          </div>
+          {% endfor %}
+        </div>
+        {% empty %}
+        <div style="padding:24px;text-align:center;color:var(--muted);font-size:14px;">No messages yet.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Actions -->
+  <div>
+    <!-- Update status -->
+    <div class="adm-section-card" style="margin-bottom:16px;">
+      <div class="adm-section-card-head"><span class="adm-section-card-title">Update Status</span></div>
+      <div class="adm-section-card-body">
+        <div class="adm-field">
+          <label>New Status</label>
+          <select id="status-select">
+            {% for val, label in statuses %}
+            <option value="{{ val }}" {% if commitment.status == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="adm-field">
+          <label>Note (visible to sponsor)</label>
+          <textarea id="status-note" rows="3" placeholder="Optional note…">{{ commitment.status_note }}</textarea>
+        </div>
+        <button onclick="updateStatus()" class="btn-primary" style="width:100%;justify-content:center;">Save Status</button>
+      </div>
+    </div>
+
+    <!-- Send email -->
+    <div class="adm-section-card">
+      <div class="adm-section-card-head"><span class="adm-section-card-title">Email Sponsor</span></div>
+      <div class="adm-section-card-body">
+        <div style="font-size:13px;color:var(--muted);margin-bottom:14px;">Sends to: <strong>{{ commitment.email }}</strong></div>
+        <div class="adm-field">
+          <label>Subject</label>
+          <input type="text" id="email-subject" placeholder="e.g. Follow-up on your inquiry">
+        </div>
+        <div class="adm-field">
+          <label>Message Body</label>
+          <textarea id="email-body" rows="5" placeholder="Write your message here…"></textarea>
+        </div>
+        <button onclick="sendEmail()" class="btn-primary" style="width:100%;justify-content:center;background:var(--blue-deep);">Send Email</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+{% block extra_scripts %}
+<script>
+const commitmentId = '{{ commitment.id }}';
+async function updateStatus() {
+  const status = document.getElementById('status-select').value;
+  const note = document.getElementById('status-note').value;
+  const j = await postJSON("{% url 'admin_update_status' commitment.id %}", { status, note });
+  if (j.success) showToast('Status updated ✓', 'var(--blue)');
+  else showToast(j.error, 'var(--red)');
+}
+async function sendEmail() {
+  const subject = document.getElementById('email-subject').value;
+  const body = document.getElementById('email-body').value;
+  if (!subject || !body) { showToast('Subject and body required', 'var(--red)'); return; }
+  const j = await postJSON("{% url 'admin_send_email' commitment.id %}", { subject, body });
+  if (j.success) { showToast('Email sent ✓', '#16a34a'); document.getElementById('email-subject').value=''; document.getElementById('email-body').value=''; }
+  else showToast(j.error, 'var(--red)');
+}
+</script>
+{% endblock %}

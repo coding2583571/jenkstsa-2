@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load static %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/packet.css' %}">{% endblock %}
+
+{% block content %}
+<div class="status-page">
+  <div class="status-card">
+    <div class="pkt-eyebrow" style="justify-content:center;margin-bottom:8px;">
+      <span class="pkt-eyebrow-bar"></span>SPONSORSHIP PORTAL
+    </div>
+    <h1 class="status-title">Check Your<br><em>Sponsorship Status</em></h1>
+    <p class="status-sub">Look up by confirmation number, email, or company name.</p>
+
+    <form class="status-form" method="GET" action="">
+      <div class="status-type-tabs">
+        <label class="stab {% if query_type == 'confirmation' or not query_type %}active{% endif %}">
+          <input type="radio" name="type" value="confirmation" {% if query_type == 'confirmation' or not query_type %}checked{% endif %}>
+          Confirmation #
+        </label>
+        <label class="stab {% if query_type == 'email' %}active{% endif %}">
+          <input type="radio" name="type" value="email" {% if query_type == 'email' %}checked{% endif %}>
+          Email
+        </label>
+        <label class="stab {% if query_type == 'company' %}active{% endif %}">
+          <input type="radio" name="type" value="company" {% if query_type == 'company' %}checked{% endif %}>
+          Company
+        </label>
+      </div>
+      <div class="status-input-row">
+        <input type="text" name="query" value="{{ query }}" placeholder="Enter your confirmation number, email, or company…" class="status-input" autofocus>
+        <button type="submit" class="btn-primary">Search</button>
+      </div>
+    </form>
+
+    {% if error %}
+    <div class="status-error">{{ error }}</div>
+    {% endif %}
+
+    {% if commitment %}
+    <div class="status-result">
+      <div class="status-result-head">
+        <div class="sr-conf">{{ commitment.confirmation_number }}</div>
+        <div class="sr-company">{{ commitment.company }}</div>
+      </div>
+
+      <div class="progress-bar-track" style="margin:16px 0;">
+        <div class="progress-bar-fill" style="width:{{ commitment.status_percent }}%; background:{{ commitment.status_display_color }}"></div>
+      </div>
+
+      <div class="status-info-grid">
+        <div><span class="sil">Contact</span> {{ commitment.contact_name }}</div>
+        <div><span class="sil">Status</span>
+          <span style="color:{{ commitment.status_display_color }};font-weight:600;">{{ commitment.get_status_display }}</span>
+        </div>
+        {% if commitment.tier %}<div><span class="sil">Tier</span> {{ commitment.tier.name }}</div>{% endif %}
+        <div><span class="sil">Submitted</span> {{ commitment.created_at|date:"M j, Y" }}</div>
+      </div>
+
+      <div class="status-actions">
+        <a href="{% url 'packet:progress' commitment.confirmation_number %}" class="btn-primary">Full Progress Page</a>
+        {% if user.is_authenticated and user.is_sponsor %}
+        <a href="{% url 'packet:link' %}" class="btn-outline">Link to My Account</a>
+        {% elif not user.is_authenticated %}
+        <a href="{% url 'accounts:signup' %}?role=sponsor" class="btn-outline">Sign Up to Track This</a>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if not commitment and not error and not query %}
+    <div class="status-empty">
+      
+      <p>Enter your confirmation number, email, or company name above.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.querySelectorAll('.stab input').forEach(r => {
+  r.addEventListener('change', () => {
+    document.querySelectorAll('.stab').forEach(t => t.classList.remove('active'));
+    r.closest('.stab').classList.add('active');
+  });
+});
+</script>
+{% endblock %}

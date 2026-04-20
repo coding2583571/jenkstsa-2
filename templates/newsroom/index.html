@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="section-eyebrow">CHAPTER UPDATES</div>
+    <h1>News<em>room.</em></h1>
+    <p>Latest news, competition results, and announcements from Jenks TSA.</p>
+  </div>
+</div>
+
+<div class="newsroom-page container">
+  <div class="newsroom-grid">
+
+    <!-- Posts -->
+    <div>
+      {% if posts %}
+        {% for post in posts %}
+        <article class="news-list-item">
+          {% if post.cover_image %}
+            <img src="{{ post.cover_image.url }}" alt="{{ post.title }}" class="nli-img">
+          {% else %}
+            <div class="nli-img-placeholder"></div>
+          {% endif %}
+          <div>
+            <div class="nli-meta">
+              <span>{{ post.author.full_name|default:"Jenks TSA" }}</span>
+              &nbsp;·&nbsp;
+              <span>{{ post.published_at|date:"F j, Y" }}</span>
+            </div>
+            <h2 class="nli-title">
+              <a href="{% url 'newsroom:detail' post.slug %}">{{ post.title }}</a>
+            </h2>
+            <a href="{% url 'newsroom:detail' post.slug %}" class="btn-text-link" style="margin-top:8px;">Read More →</a>
+          </div>
+        </article>
+        {% endfor %}
+      {% else %}
+        <div style="padding:64px 0;text-align:center;color:var(--muted);">
+          
+          <p style="font-size:15px;">No posts yet. Check back soon for chapter updates.</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Sidebar -->
+    <aside>
+      <div style="background:var(--ink);padding:24px;color:#fff;margin-bottom:16px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:14px;">FOLLOW US</div>
+        <a href="https://instagram.com/jenkstsa" target="_blank" rel="noopener"
+          style="display:flex;align-items:center;gap:10px;color:rgba(255,255,255,0.8);font-size:14px;font-weight:600;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.1);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+          @jenkstsa
+        </a>
+        <a href="https://linkedin.com/company/jenkstsa" target="_blank" rel="noopener"
+          style="display:flex;align-items:center;gap:10px;color:rgba(255,255,255,0.8);font-size:14px;font-weight:600;padding:10px 0;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+          LinkedIn
+        </a>
+      </div>
+
+      <div style="background:var(--cream);border:1px solid var(--line);border-top:3px solid var(--blue);padding:22px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">SPONSOR US</div>
+        <p style="font-size:13.5px;color:var(--ink-soft);line-height:1.55;margin-bottom:14px;">
+          Partner with Jenks TSA and invest in the next generation of technology leaders.
+        </p>
+        <a href="{% url 'packet:packet' %}" class="btn-primary" style="width:100%;justify-content:center;">View Prospectus</a>
+      </div>
+    </aside>
+
+  </div>
+</div>
+
+{% endblock %}

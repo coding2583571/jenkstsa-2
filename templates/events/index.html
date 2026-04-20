@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="events-hero">
+  <div class="section-eyebrow" style="justify-content:center;color:rgba(255,255,255,0.45);">
+    <span style="display:block;width:28px;height:2px;background:var(--red);"></span>
+    TSA COMPETITIVE EVENTS
+  </div>
+  <h1>What we <em>compete</em> in.</h1>
+  <p>High school–level TSA events spanning engineering, software, design, leadership, and beyond.</p>
+</div>
+
+<div class="events-body container">
+
+  <div class="events-filters" id="filter-bar">
+    <button class="filter-btn active" data-cat="all" onclick="filterEvents(this,'all')">All Events</button>
+    <button class="filter-btn" data-cat="Engineering" onclick="filterEvents(this,'Engineering')">Engineering</button>
+    <button class="filter-btn" data-cat="Technology" onclick="filterEvents(this,'Technology')">Technology</button>
+    <button class="filter-btn" data-cat="Leadership" onclick="filterEvents(this,'Leadership')">Leadership</button>
+    <button class="filter-btn" data-cat="Design" onclick="filterEvents(this,'Design')">Design</button>
+    <button class="filter-btn" data-cat="STEM" onclick="filterEvents(this,'STEM')">STEM</button>
+  </div>
+
+  {% if events %}
+  <div class="events-grid" id="events-grid">
+    {% for event in events %}
+    <div class="event-card" data-cat="{{ event.category }}">
+      <div class="event-card-category">{{ event.category|default:"General" }}</div>
+      <div class="event-card-name">{{ event.name }}</div>
+      <div class="event-card-desc">{{ event.description|truncatewords:22 }}</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:auto;">
+        <span class="event-card-level">{{ event.get_level_display }}</span>
+        <a href="{% url 'events:detail' event.slug %}" style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--blue);">Details →</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:64px 0;color:var(--muted);">
+    
+    <p style="font-size:15px;">Event information is being updated. Check back soon.</p>
+  </div>
+  {% endif %}
+
+</div>
+
+{% endblock %}
+{% block extra_scripts %}
+<script>
+function filterEvents(btn, cat) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.event-card').forEach(card => {
+    card.style.display = (cat === 'all' || card.dataset.cat === cat) ? '' : 'none';
+  });
+}
+</script>
+{% endblock %}

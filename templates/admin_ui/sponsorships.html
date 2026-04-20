@@ -1,0 +1,43 @@
+{% extends "admin_ui/base.html" %}
+{% block content %}
+{% csrf_token %}
+
+<div style="display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap;">
+  <a href="{% url 'admin_sponsorships' %}" class="filter-btn {% if not status_filter %}active{% endif %}">All</a>
+  {% for val, label in statuses %}
+  <a href="{% url 'admin_sponsorships' %}?status={{ val }}" class="filter-btn {% if status_filter == val %}active{% endif %}">{{ label }}</a>
+  {% endfor %}
+</div>
+
+<div class="adm-table-wrap">
+  <div class="adm-table-head">
+    <span class="adm-table-title">Sponsorship Commitments{% if status_filter %} — {{ status_filter|title }}{% endif %}</span>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);">{{ commitments|length }} record(s)</span>
+  </div>
+  <table class="adm-table">
+    <thead><tr>
+      <th>Confirmation</th><th>Company</th><th>Contact</th><th>Email</th><th>Tier</th><th>Status</th><th>Progress</th><th>Date</th>
+    </tr></thead>
+    <tbody>
+    {% for c in commitments %}
+    <tr>
+      <td><a href="{% url 'admin_sponsorship_detail' c.id %}">{{ c.confirmation_number }}</a></td>
+      <td style="font-weight:600;">{{ c.company }}</td>
+      <td>{{ c.contact_name }}</td>
+      <td style="color:var(--muted);">{{ c.email }}</td>
+      <td>{{ c.tier.name|default:"—" }}</td>
+      <td><span class="status-badge status-{{ c.status }}">{{ c.get_status_display }}</span></td>
+      <td>
+        <div class="mini-progress">
+          <div class="mini-progress-fill" style="width:{{ c.status_percent }}%;background:{{ c.status_display_color }};"></div>
+        </div>
+      </td>
+      <td style="color:var(--muted);white-space:nowrap;">{{ c.created_at|date:"M j, Y" }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:40px;">No commitments found.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
